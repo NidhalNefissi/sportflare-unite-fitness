@@ -8,7 +8,7 @@ export interface Product {
   image: string;
   rating: number;
   reviews: number;
-  category: 'Supplements' | 'Equipment' | 'Apparel' | 'Accessories';
+  category: 'Supplements' | 'Equipment';
   description: string;
   inStock: boolean;
   features: string[];

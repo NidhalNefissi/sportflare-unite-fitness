@@ -156,17 +156,31 @@ export const mockProducts: Product[] = [
   },
   {
     id: '3',
-    name: 'Performance Athletic Wear Set',
+    name: 'BCAA Energy Powder',
     brand: 'SportStyle',
-    price: 79.99,
-    originalPrice: 95.99,
-    image: 'https://images.unsplash.com/photo-1506629905607-83d682b2b05d?w=400&h=400&fit=crop',
+    price: 45.99,
+    originalPrice: 55.99,
+    image: 'https://images.unsplash.com/photo-1544966503-7cc4ac882d2d?w=400&h=400&fit=crop',
     rating: 4.3,
     reviews: 67,
-    category: 'Apparel',
-    description: 'Moisture-wicking athletic wear set perfect for intense workouts.',
+    category: 'Supplements',
+    description: 'Branch-chain amino acids with natural caffeine for workout energy.',
     inStock: true,
-    features: ['Moisture-wicking fabric', 'Flexible fit', 'Breathable material', 'Machine washable']
+    features: ['Natural caffeine', 'Essential BCAAs', 'No artificial colors', 'Great mixing']
+  },
+  {
+    id: '4',
+    name: 'Resistance Bands Set',
+    brand: 'FitEquip',
+    price: 29.99,
+    originalPrice: 39.99,
+    image: 'https://images.unsplash.com/photo-1506906550671-5dd950f6a061?w=400&h=400&fit=crop',
+    rating: 4.6,
+    reviews: 156,
+    category: 'Equipment',
+    description: 'Complete resistance bands set with multiple resistance levels.',
+    inStock: true,
+    features: ['5 resistance levels', 'Door anchor included', 'Portable design', 'Exercise guide']
   }
 ];
 

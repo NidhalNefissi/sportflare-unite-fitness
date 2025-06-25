@@ -1,122 +1,88 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole } from '@/types/user';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { mockUsers } from '@/data/mockUsers';
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: 'client' | 'coach' | 'gym_owner' | 'brand';
+  avatar?: string;
+}
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, role: UserRole) => Promise<boolean>;
-  register: (userData: RegisterData) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  isLoading: boolean;
-}
-
-interface RegisterData {
-  email: string;
-  password: string;
-  name: string;
-  role: UserRole;
-  [key: string]: any;
+  register: (email: string, password: string, name: string, role: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for development
-const mockUsers: User[] = [
-  {
-    id: '1',
-    email: 'client@test.com',
-    role: 'client',
-    name: 'John Smith',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-    created_at: '2024-01-01T00:00:00Z'
-  },
-  {
-    id: '2',
-    email: 'gym@test.com',
-    role: 'gym_owner',
-    name: 'Sarah Johnson',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
-    created_at: '2024-01-01T00:00:00Z'
-  },
-  {
-    id: '3',
-    email: 'coach@test.com',
-    role: 'coach',
-    name: 'Mike Wilson',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-    created_at: '2024-01-01T00:00:00Z'
-  },
-  {
-    id: '4',
-    email: 'brand@test.com',
-    role: 'brand',
-    name: 'FitGear Inc',
-    avatar: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop',
-    created_at: '2024-01-01T00:00:00Z'
-  }
-];
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(() => {
+    // Check if user is logged in from localStorage
+    const savedUser = localStorage.getItem('sportflare_user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Check for stored user on mount
-    const storedUser = localStorage.getItem('sportflare_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
-
-  const login = async (email: string, password: string, role: UserRole): Promise<boolean> => {
-    setIsLoading(true);
+  const login = async (email: string, password: string): Promise<boolean> => {
+    console.log('Attempting login with:', email, password);
     
-    // Mock authentication - in real app, this would be an API call
-    const foundUser = mockUsers.find(u => u.email === email && u.role === role);
+    const mockUser = mockUsers.find(u => u.email === email && u.password === password);
     
-    if (foundUser && password === 'password123') {
-      setUser(foundUser);
-      localStorage.setItem('sportflare_user', JSON.stringify(foundUser));
-      setIsLoading(false);
+    if (mockUser) {
+      const userData = {
+        id: mockUser.id,
+        email: mockUser.email,
+        name: mockUser.name,
+        role: mockUser.role,
+        avatar: mockUser.avatar
+      };
+      
+      setUser(userData);
+      localStorage.setItem('sportflare_user', JSON.stringify(userData));
+      console.log('Login successful:', userData);
       return true;
     }
     
-    setIsLoading(false);
+    console.log('Login failed: Invalid credentials');
     return false;
-  };
-
-  const register = async (userData: RegisterData): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Mock registration - in real app, this would be an API call
-    const newUser: User = {
-      id: Date.now().toString(),
-      email: userData.email,
-      role: userData.role,
-      name: userData.name,
-      created_at: new Date().toISOString()
-    };
-    
-    setUser(newUser);
-    localStorage.setItem('sportflare_user', JSON.stringify(newUser));
-    setIsLoading(false);
-    return true;
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('sportflare_user');
+    console.log('User logged out');
+  };
+
+  const register = async (email: string, password: string, name: string, role: string): Promise<boolean> => {
+    // Mock registration - in real app, this would call an API
+    console.log('Mock registration:', { email, name, role });
+    
+    // Check if user already exists
+    const existingUser = mockUsers.find(u => u.email === email);
+    if (existingUser) {
+      return false;
+    }
+    
+    // Create new user
+    const newUser = {
+      id: `${role}-${Date.now()}`,
+      email,
+      name,
+      role: role as User['role'],
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+    };
+    
+    setUser(newUser);
+    localStorage.setItem('sportflare_user', JSON.stringify(newUser));
+    
+    return true;
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      login,
-      register,
-      logout,
-      isLoading
-    }}>
+    <AuthContext.Provider value={{ user, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
