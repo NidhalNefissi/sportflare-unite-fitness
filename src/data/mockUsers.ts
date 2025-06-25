@@ -4,7 +4,7 @@ export interface MockUser {
   email: string;
   password: string;
   name: string;
-  role: 'client' | 'coach' | 'gym_owner' | 'brand';
+  role: 'client' | 'coach' | 'gym_owner' | 'brand' | 'admin';
   avatar?: string;
 }
 
@@ -76,5 +76,22 @@ export const mockUsers: MockUser[] = [
     name: 'SportStyle',
     role: 'brand',
     avatar: 'https://images.unsplash.com/photo-1506629905607-83d682b2b05d?w=100&h=100&fit=crop&crop=face'
+  },
+  // Admins
+  {
+    id: 'admin-1',
+    email: 'admin1@test.com',
+    password: 'password123',
+    name: 'SportFlare Admin',
+    role: 'admin',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+  },
+  {
+    id: 'admin-2',
+    email: 'admin2@test.com',
+    password: 'password123',
+    name: 'System Administrator',
+    role: 'admin',
+    avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face'
   }
 ];

@@ -25,6 +25,10 @@ import ClassSchedule from "./pages/coach/ClassSchedule";
 import Programs from "./pages/coach/Programs";
 import BrandDashboard from "./pages/brand/Dashboard";
 import ProductManagement from "./pages/brand/ProductManagement";
+import AdminDashboard from "./pages/admin/Dashboard";
+import Terms from "./pages/legal/Terms";
+import Privacy from "./pages/legal/Privacy";
+import About from "./pages/public/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +46,11 @@ const App = () => (
                 <Route path="/" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                
+                {/* Legal Pages */}
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/about" element={<About />} />
                 
                 {/* Client Routes */}
                 <Route 
@@ -143,6 +152,16 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={['brand']}>
                       <ProductManagement />
+                    </ProtectedRoute>
+                  } 
+                />
+                
+                {/* Admin Routes */}
+                <Route 
+                  path="/admin/dashboard" 
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminDashboard />
                     </ProtectedRoute>
                   } 
                 />

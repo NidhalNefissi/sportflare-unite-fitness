@@ -1,5 +1,4 @@
-
-export type UserRole = 'client' | 'gym_owner' | 'coach' | 'brand';
+export type UserRole = 'client' | 'gym_owner' | 'coach' | 'brand' | 'admin';
 
 export interface User {
   id: string;

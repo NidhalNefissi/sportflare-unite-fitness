@@ -24,7 +24,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password, role);
+      const success = await login(email, password);
       if (success) {
         toast({
           title: "Welcome back!",
@@ -53,10 +53,10 @@ const Login = () => {
   };
 
   const testCredentials = [
-    { email: 'client@test.com', role: 'client' as UserRole, name: 'Client' },
-    { email: 'gym@test.com', role: 'gym_owner' as UserRole, name: 'Gym Owner' },
-    { email: 'coach@test.com', role: 'coach' as UserRole, name: 'Coach' },
-    { email: 'brand@test.com', role: 'brand' as UserRole, name: 'Brand' },
+    { email: 'client1@test.com', role: 'client' as UserRole, name: 'Client' },
+    { email: 'gym1@test.com', role: 'gym_owner' as UserRole, name: 'Gym Owner' },
+    { email: 'coach1@test.com', role: 'coach' as UserRole, name: 'Coach' },
+    { email: 'brand1@test.com', role: 'brand' as UserRole, name: 'Brand' },
   ];
 
   const fillTestCredentials = (testEmail: string, testRole: UserRole) => {
@@ -101,6 +101,7 @@ const Login = () => {
                     <SelectItem value="gym_owner">Gym Owner</SelectItem>
                     <SelectItem value="coach">Coach</SelectItem>
                     <SelectItem value="brand">Brand</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

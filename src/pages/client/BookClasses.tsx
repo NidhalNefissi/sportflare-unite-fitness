@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useBooking } from '@/contexts/BookingContext';
 import { mockGyms } from '@/data/mockData';
 import { Calendar, Clock, MapPin, Users, Star, Search, Filter } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 const BookClasses = () => {
   const { availableClasses, bookClass } = useBooking();
@@ -16,6 +17,9 @@ const BookClasses = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [sortBy, setSortBy] = useState('date');
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+  const [selectedClass, setSelectedClass] = useState<any>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'online' | 'in_person'>('online');
 
   const filteredClasses = useMemo(() => {
     let filtered = availableClasses.filter(classItem => {
@@ -46,7 +50,8 @@ const BookClasses = () => {
   }, [availableClasses, searchTerm, selectedCategory, selectedDifficulty, sortBy]);
 
   const handleBookClass = async (classSchedule: any) => {
-    await bookClass(classSchedule);
+    setSelectedClass(classSchedule);
+    setBookingDialogOpen(true);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -70,6 +75,27 @@ const BookClasses = () => {
       return 'Tomorrow';
     } else {
       return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+  };
+
+  const confirmBooking = async () => {
+    if (selectedClass) {
+      const bookingData = {
+        ...selectedClass,
+        paymentMethod,
+        paymentStatus: paymentMethod === 'online' ? 'pending' : 'pay_at_gym'
+      };
+      
+      await bookClass(bookingData);
+      setBookingDialogOpen(false);
+      setSelectedClass(null);
+      
+      toast({
+        title: "Class Booked!",
+        description: paymentMethod === 'online' 
+          ? "Payment will be processed shortly." 
+          : "Please pay at the gym before your class.",
+      });
     }
   };
 
@@ -210,6 +236,72 @@ const BookClasses = () => {
             </Card>
           ))}
         </div>
+
+        {/* Booking Confirmation Dialog */}
+        <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Confirm Booking</DialogTitle>
+              <DialogDescription>
+                Choose your payment method for {selectedClass?.name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium">{selectedClass?.name}</h4>
+                <p className="text-sm text-gray-600">{selectedClass?.gym.name}</p>
+                <p className="text-sm text-gray-600">
+                  {selectedClass && formatDate(selectedClass.date)} at {selectedClass?.startTime}
+                </p>
+                <p className="text-lg font-bold text-blue-600 mt-2">{selectedClass?.price} TND</p>
+              </div>
+              
+              <div className="space-y-3">
+                <h4 className="font-medium">Payment Method:</h4>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="online"
+                      checked={paymentMethod === 'online'}
+                      onChange={(e) => setPaymentMethod(e.target.value as 'online')}
+                      className="text-blue-600"
+                    />
+                    <span>Pay Online (Flouci.tn)</span>
+                  </label>
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="in_person"
+                      checked={paymentMethod === 'in_person'}
+                      onChange={(e) => setPaymentMethod(e.target.value as 'in_person')}
+                      className="text-blue-600"
+                    />
+                    <span>Pay at Gym</span>
+                  </label>
+                </div>
+                
+                {paymentMethod === 'in_person' && (
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800">
+                      Please arrive 15 minutes early to complete payment at the gym reception.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setBookingDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={confirmBooking} className="bg-blue-600 hover:bg-blue-700">
+                Confirm Booking
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {filteredClasses.length === 0 && (
           <Card>
