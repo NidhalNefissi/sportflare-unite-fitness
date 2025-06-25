@@ -17,9 +17,14 @@ import ClientDashboard from "./pages/client/Dashboard";
 import BookClasses from "./pages/client/BookClasses";
 import MyBookings from "./pages/client/MyBookings";
 import Marketplace from "./pages/client/Marketplace";
+import AICoach from "./pages/client/AICoach";
 import GymOwnerDashboard from "./pages/gym-owner/Dashboard";
+import StudioManagement from "./pages/gym-owner/StudioManagement";
 import CoachDashboard from "./pages/coach/Dashboard";
+import ClassSchedule from "./pages/coach/ClassSchedule";
+import Programs from "./pages/coach/Programs";
 import BrandDashboard from "./pages/brand/Dashboard";
+import ProductManagement from "./pages/brand/ProductManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -71,6 +76,14 @@ const App = () => (
                     </ProtectedRoute>
                   } 
                 />
+                <Route 
+                  path="/client/ai-coach" 
+                  element={
+                    <ProtectedRoute allowedRoles={['client']}>
+                      <AICoach />
+                    </ProtectedRoute>
+                  } 
+                />
                 
                 {/* Gym Owner Routes */}
                 <Route 
@@ -78,6 +91,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={['gym_owner']}>
                       <GymOwnerDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/gym-owner/studio-management" 
+                  element={
+                    <ProtectedRoute allowedRoles={['gym_owner']}>
+                      <StudioManagement />
                     </ProtectedRoute>
                   } 
                 />
@@ -91,6 +112,22 @@ const App = () => (
                     </ProtectedRoute>
                   } 
                 />
+                <Route 
+                  path="/coach/class-schedule" 
+                  element={
+                    <ProtectedRoute allowedRoles={['coach']}>
+                      <ClassSchedule />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/coach/programs" 
+                  element={
+                    <ProtectedRoute allowedRoles={['coach']}>
+                      <Programs />
+                    </ProtectedRoute>
+                  } 
+                />
                 
                 {/* Brand Routes */}
                 <Route 
@@ -98,6 +135,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={['brand']}>
                       <BrandDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/brand/product-management" 
+                  element={
+                    <ProtectedRoute allowedRoles={['brand']}>
+                      <ProductManagement />
                     </ProtectedRoute>
                   } 
                 />

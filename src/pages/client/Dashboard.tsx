@@ -86,6 +86,7 @@ const ClientDashboard = () => {
             )}
           </Button>
           <Button 
+            onClick={() => navigate('/client/ai-coach')}
             className="h-20 bg-orange-600 hover:bg-orange-700 flex-col gap-2"
           >
             <Star className="w-6 h-6" />

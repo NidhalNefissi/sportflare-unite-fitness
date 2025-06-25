@@ -1,13 +1,14 @@
-
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { Star, TrendingUp, Plus, Package, Users, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const BrandDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const brandStats = {
     totalProducts: 47,
@@ -62,6 +63,29 @@ const BrandDashboard = () => {
         <div className="bg-gradient-to-r from-orange-600 to-red-600 rounded-xl p-6 text-white">
           <h1 className="text-2xl font-bold mb-2">Welcome back, {user?.name}!</h1>
           <p className="text-orange-100">Manage your fitness products and reach more customers</p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Button 
+            onClick={() => navigate('/brand/product-management')}
+            className="h-16 bg-orange-600 hover:bg-orange-700 flex items-center justify-center gap-3"
+          >
+            <Package className="w-6 h-6" />
+            <span className="text-lg">Manage Products</span>
+          </Button>
+          <Button 
+            className="h-16 bg-red-600 hover:bg-red-700 flex items-center justify-center gap-3"
+          >
+            <TrendingUp className="w-6 h-6" />
+            <span className="text-lg">Sales Analytics</span>
+          </Button>
+          <Button 
+            className="h-16 bg-pink-600 hover:bg-pink-700 flex items-center justify-center gap-3"
+          >
+            <Star className="w-6 h-6" />
+            <span className="text-lg">Promotions</span>
+          </Button>
         </div>
 
         {/* Quick Stats */}

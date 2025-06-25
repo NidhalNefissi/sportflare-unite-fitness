@@ -1,13 +1,14 @@
-
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { Users, Clock, Star, TrendingUp, Plus, QrCode, Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const CoachDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const coachStats = {
     totalClients: 89,
@@ -63,6 +64,30 @@ const CoachDashboard = () => {
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-6 text-white">
           <h1 className="text-2xl font-bold mb-2">Welcome back, Coach {user?.name}!</h1>
           <p className="text-purple-100">Ready to inspire and train today?</p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Button 
+            onClick={() => navigate('/coach/class-schedule')}
+            className="h-16 bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-3"
+          >
+            <Calendar className="w-6 h-6" />
+            <span className="text-lg">Manage Classes</span>
+          </Button>
+          <Button 
+            onClick={() => navigate('/coach/programs')}
+            className="h-16 bg-pink-600 hover:bg-pink-700 flex items-center justify-center gap-3"
+          >
+            <Star className="w-6 h-6" />
+            <span className="text-lg">My Programs</span>
+          </Button>
+          <Button 
+            className="h-16 bg-indigo-600 hover:bg-indigo-700 flex items-center justify-center gap-3"
+          >
+            <Users className="w-6 h-6" />
+            <span className="text-lg">My Clients</span>
+          </Button>
         </div>
 
         {/* Quick Stats */}

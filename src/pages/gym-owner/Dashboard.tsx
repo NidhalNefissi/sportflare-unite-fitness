@@ -1,13 +1,14 @@
-
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { Users, MapPin, Clock, Star, Plus, TrendingUp, Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const GymOwnerDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const gymStats = {
     totalMembers: 347,
@@ -40,6 +41,29 @@ const GymOwnerDashboard = () => {
         <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl p-6 text-white">
           <h1 className="text-2xl font-bold mb-2">Welcome back, {user?.name}!</h1>
           <p className="text-green-100">FitZone Downtown • Manage your gym operations</p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Button 
+            onClick={() => navigate('/gym-owner/studio-management')}
+            className="h-16 bg-green-600 hover:bg-green-700 flex items-center justify-center gap-3"
+          >
+            <MapPin className="w-6 h-6" />
+            <span className="text-lg">Studio Requests</span>
+          </Button>
+          <Button 
+            className="h-16 bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-3"
+          >
+            <Calendar className="w-6 h-6" />
+            <span className="text-lg">Class Schedule</span>
+          </Button>
+          <Button 
+            className="h-16 bg-teal-600 hover:bg-teal-700 flex items-center justify-center gap-3"
+          >
+            <TrendingUp className="w-6 h-6" />
+            <span className="text-lg">Analytics</span>
+          </Button>
         </div>
 
         {/* Quick Stats */}
