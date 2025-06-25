@@ -1,37 +1,25 @@
 
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
-import { Calendar, Clock, MapPin, Star, Users, Plus } from 'lucide-react';
+import { useBooking } from '@/contexts/BookingContext';
+import { useMarketplace } from '@/contexts/MarketplaceContext';
+import { Calendar, Clock, MapPin, Star, Users, Plus, ShoppingCart, QrCode } from 'lucide-react';
 
 const ClientDashboard = () => {
   const { user } = useAuth();
+  const { bookings } = useBooking();
+  const { getCartItemCount } = useMarketplace();
+  const navigate = useNavigate();
 
-  const upcomingClasses = [
-    {
-      id: 1,
-      name: 'HIIT Cardio Blast',
-      gym: 'FitZone Downtown',
-      coach: 'Sarah Johnson',
-      time: '6:00 PM',
-      date: 'Today',
-      duration: '45 min',
-      intensity: 'High'
-    },
-    {
-      id: 2,
-      name: 'Yoga Flow',
-      gym: 'Zen Fitness',
-      coach: 'Mike Wilson',
-      time: '7:30 AM',
-      date: 'Tomorrow',
-      duration: '60 min',
-      intensity: 'Low'
-    }
-  ];
+  const upcomingBookings = bookings.filter(b => 
+    b.status === 'booked' && 
+    new Date(`${b.classSchedule.date}T${b.classSchedule.startTime}`) > new Date()
+  ).slice(0, 2); // Show only next 2 bookings
 
   const weeklyGoals = {
     workouts: { current: 4, target: 6 },
@@ -45,6 +33,21 @@ const ClientDashboard = () => {
     { type: 'workout', name: 'Morning Run', date: '3 days ago', rating: 5 }
   ];
 
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return 'Tomorrow';
+    } else {
+      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+  };
+
   return (
     <DashboardLayout role="client">
       <div className="space-y-6">
@@ -52,6 +55,42 @@ const ClientDashboard = () => {
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
           <h1 className="text-2xl font-bold mb-2">Welcome back, {user?.name}!</h1>
           <p className="text-blue-100">Ready to crush your fitness goals today?</p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Button 
+            onClick={() => navigate('/client/book-classes')}
+            className="h-20 bg-blue-600 hover:bg-blue-700 flex-col gap-2"
+          >
+            <Calendar className="w-6 h-6" />
+            <span>Book Classes</span>
+          </Button>
+          <Button 
+            onClick={() => navigate('/client/my-bookings')}
+            className="h-20 bg-purple-600 hover:bg-purple-700 flex-col gap-2"
+          >
+            <QrCode className="w-6 h-6" />
+            <span>My Bookings</span>
+          </Button>
+          <Button 
+            onClick={() => navigate('/client/marketplace')}
+            className="h-20 bg-green-600 hover:bg-green-700 flex-col gap-2 relative"
+          >
+            <ShoppingCart className="w-6 h-6" />
+            <span>Marketplace</span>
+            {getCartItemCount() > 0 && (
+              <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs">
+                {getCartItemCount()}
+              </Badge>
+            )}
+          </Button>
+          <Button 
+            className="h-20 bg-orange-600 hover:bg-orange-700 flex-col gap-2"
+          >
+            <Star className="w-6 h-6" />
+            <span>AI Coach</span>
+          </Button>
         </div>
 
         {/* Quick Stats */}
@@ -120,40 +159,59 @@ const ClientDashboard = () => {
                   </CardTitle>
                   <CardDescription>Your scheduled workouts</CardDescription>
                 </div>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                <Button 
+                  size="sm" 
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => navigate('/client/book-classes')}
+                >
                   <Plus className="w-4 h-4 mr-1" />
                   Book Class
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {upcomingClasses.map((classItem) => (
-                <div key={classItem.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">{classItem.name}</h4>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                      <MapPin className="w-3 h-3" />
-                      <span>{classItem.gym}</span>
-                      <span>•</span>
-                      <span>{classItem.coach}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                      <Clock className="w-3 h-3" />
-                      <span>{classItem.date} at {classItem.time}</span>
-                      <span>•</span>
-                      <span>{classItem.duration}</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <Badge 
-                      variant={classItem.intensity === 'High' ? 'destructive' : 
-                              classItem.intensity === 'Low' ? 'secondary' : 'default'}
-                    >
-                      {classItem.intensity}
-                    </Badge>
-                  </div>
+              {upcomingBookings.length === 0 ? (
+                <div className="text-center py-6">
+                  <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-600 mb-4">No upcoming classes</p>
+                  <Button 
+                    onClick={() => navigate('/client/book-classes')}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Browse Classes
+                  </Button>
                 </div>
-              ))}
+              ) : (
+                <>
+                  {upcomingBookings.map((booking) => (
+                    <div key={booking.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex-1">
+                        <h4 className="font-medium">{booking.classSchedule.name}</h4>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                          <MapPin className="w-3 h-3" />
+                          <span>{booking.classSchedule.gym.name}</span>
+                          <span>•</span>
+                          <span>{booking.classSchedule.coach.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{formatDate(booking.classSchedule.date)} at {booking.classSchedule.startTime}</span>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="border-blue-300 text-blue-700">
+                        Booked
+                      </Badge>
+                    </div>
+                  ))}
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => navigate('/client/my-bookings')}
+                  >
+                    View All Bookings
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -172,7 +230,12 @@ const ClientDashboard = () => {
                 <p className="text-sm text-purple-700 mb-3">
                   Based on your goals, try adding 2 more cardio sessions this week.
                 </p>
-                <Button size="sm" variant="outline" className="border-purple-300 text-purple-700">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="border-purple-300 text-purple-700"
+                  onClick={() => navigate('/client/book-classes')}
+                >
                   View Cardio Classes
                 </Button>
               </div>
@@ -192,8 +255,13 @@ const ClientDashboard = () => {
                 <p className="text-sm text-orange-700 mb-3">
                   Add 20g more protein to support your muscle building goals.
                 </p>
-                <Button size="sm" variant="outline" className="border-orange-300 text-orange-700">
-                  Meal Plans
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="border-orange-300 text-orange-700"
+                  onClick={() => navigate('/client/marketplace')}
+                >
+                  Shop Supplements
                 </Button>
               </div>
             </CardContent>
