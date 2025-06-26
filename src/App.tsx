@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,9 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ClientDashboard from "./pages/client/Dashboard";
+import ClientProfile from "./pages/client/Profile";
+import ClientGyms from "./pages/client/Gyms";
+import ClientCoaches from "./pages/client/Coaches";
 import BookClasses from "./pages/client/BookClasses";
 import MyBookings from "./pages/client/MyBookings";
 import Marketplace from "./pages/client/Marketplace";
@@ -30,6 +32,7 @@ import Terms from "./pages/legal/Terms";
 import Privacy from "./pages/legal/Privacy";
 import About from "./pages/public/About";
 import NotFound from "./pages/NotFound";
+import ClientSubscriptions from "./pages/client/Subscriptions";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +65,30 @@ const App = () => (
                   } 
                 />
                 <Route 
+                  path="/client/profile" 
+                  element={
+                    <ProtectedRoute allowedRoles={['client']}>
+                      <ClientProfile />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/client/gyms" 
+                  element={
+                    <ProtectedRoute allowedRoles={['client']}>
+                      <ClientGyms />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/client/coaches" 
+                  element={
+                    <ProtectedRoute allowedRoles={['client']}>
+                      <ClientCoaches />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
                   path="/client/book-classes" 
                   element={
                     <ProtectedRoute allowedRoles={['client']}>
@@ -90,6 +117,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={['client']}>
                       <AICoach />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/client/subscriptions" 
+                  element={
+                    <ProtectedRoute allowedRoles={['client']}>
+                      <ClientSubscriptions />
                     </ProtectedRoute>
                   } 
                 />
