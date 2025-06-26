@@ -21,15 +21,18 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
+type PlanType = 'basic' | 'plus' | 'premium';
+type DurationType = '1' | '3' | '6' | '12';
+
 const ClientSubscriptions = () => {
-  const [selectedPlan, setSelectedPlan] = useState('plus');
-  const [selectedDuration, setSelectedDuration] = useState('1');
+  const [selectedPlan, setSelectedPlan] = useState<PlanType>('plus');
+  const [selectedDuration, setSelectedDuration] = useState<DurationType>('1');
   const [paymentMethod, setPaymentMethod] = useState('online');
   const navigate = useNavigate();
 
   const plans = [
     {
-      id: 'basic',
+      id: 'basic' as PlanType,
       name: 'Basic',
       subtitle: 'Accès Zone Musculation',
       icon: <Dumbbell className="w-8 h-8" />,
@@ -47,7 +50,7 @@ const ClientSubscriptions = () => {
       ]
     },
     {
-      id: 'plus',
+      id: 'plus' as PlanType,
       name: 'Plus',
       subtitle: 'Musculation + Cours',
       icon: <Users className="w-8 h-8" />,
@@ -67,7 +70,7 @@ const ClientSubscriptions = () => {
       ]
     },
     {
-      id: 'premium',
+      id: 'premium' as PlanType,
       name: 'Premium',
       subtitle: 'Accès Illimité',
       icon: <Crown className="w-8 h-8" />,
@@ -89,13 +92,13 @@ const ClientSubscriptions = () => {
 
   const durations = [
     {
-      value: '1',
+      value: '1' as DurationType,
       label: '1 Mois',
       discount: 0,
       bonus: 0
     },
     {
-      value: '3',
+      value: '3' as DurationType,
       label: '3 Mois',
       discount: 0,
       bonus: 1,
@@ -103,14 +106,14 @@ const ClientSubscriptions = () => {
       description: 'Payez 3, obtenez 4 mois'
     },
     {
-      value: '6',
+      value: '6' as DurationType,
       label: '6 Mois',
       discount: 0,
       bonus: 2,
       description: 'Payez 6, obtenez 8 mois'
     },
     {
-      value: '12',
+      value: '12' as DurationType,
       label: '12 Mois',
       discount: 0,
       bonus: 4,
@@ -118,15 +121,15 @@ const ClientSubscriptions = () => {
     }
   ];
 
-  const pricing = {
-    basic: { 1: 45, 3: 40, 6: 38, 12: 35 },
-    plus: { 1: 65, 3: 60, 6: 55, 12: 50 },
-    premium: { 1: 95, 3: 85, 6: 80, 12: 75 }
+  const pricing: Record<PlanType, Record<DurationType, number>> = {
+    basic: { '1': 45, '3': 40, '6': 38, '12': 35 },
+    plus: { '1': 65, '3': 60, '6': 55, '12': 50 },
+    premium: { '1': 95, '3': 85, '6': 80, '12': 75 }
   };
 
   const selectedPlanData = plans.find(p => p.id === selectedPlan);
   const selectedDurationData = durations.find(d => d.value === selectedDuration);
-  const monthlyPrice = pricing[selectedPlan as keyof typeof pricing][selectedDuration as keyof typeof pricing.basic];
+  const monthlyPrice = pricing[selectedPlan][selectedDuration];
   const totalMonths = parseInt(selectedDuration) + (selectedDurationData?.bonus || 0);
   const totalPrice = monthlyPrice * parseInt(selectedDuration);
 
@@ -183,7 +186,7 @@ const ClientSubscriptions = () => {
                 <CardDescription>Sélectionnez le plan qui vous convient le mieux</CardDescription>
               </CardHeader>
               <CardContent>
-                <RadioGroup value={selectedPlan} onValueChange={setSelectedPlan} className="space-y-4">
+                <RadioGroup value={selectedPlan} onValueChange={(value) => setSelectedPlan(value as PlanType)} className="space-y-4">
                   {plans.map((plan) => (
                     <div key={plan.id} className="relative">
                       <div className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
@@ -251,7 +254,7 @@ const ClientSubscriptions = () => {
                 <CardDescription>Plus long = plus d'économies et de mois bonus</CardDescription>
               </CardHeader>
               <CardContent>
-                <RadioGroup value={selectedDuration} onValueChange={setSelectedDuration} className="grid grid-cols-2 gap-4">
+                <RadioGroup value={selectedDuration} onValueChange={(value) => setSelectedDuration(value as DurationType)} className="grid grid-cols-2 gap-4">
                   {durations.map((duration) => (
                     <div key={duration.value} className="relative">
                       <div className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
