@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -113,7 +112,7 @@ const MyBookings = () => {
                   className="bg-blue-600 hover:bg-blue-700"
                   onClick={() => navigate('/client/book-classes')}
                 >
-                  Parcourir les Cours
+                  Browse Classes
                 </Button>
               </div>
             ) : (

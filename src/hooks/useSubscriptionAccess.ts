@@ -18,11 +18,11 @@ export const useSubscriptionAccess = () => {
   };
   
   const canAccessGyms = () => {
-    return currentPlan !== 'basic';
+    return currentPlan !== 'basic' && currentPlan !== null;
   };
   
   const canAccessCoaches = () => {
-    return currentPlan !== 'basic';
+    return currentPlan !== 'basic' && currentPlan !== null;
   };
   
   const canBookMultiplePerDay = () => {

@@ -1,44 +1,30 @@
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Edit, Calendar, Brain, Plus, Camera, Share, Lock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  User, 
-  Phone, 
-  Mail, 
-  Edit, 
-  Camera, 
-  Calendar,
-  Target,
-  TrendingUp,
-  Share2,
-  Activity
-} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { useSubscriptionAccess } from '@/hooks/useSubscriptionAccess';
 
-interface BodyMetrics {
+interface BodyMetric {
   id: string;
   date: string;
   gender: 'male' | 'female' | 'other';
   age: number;
   weight: number;
   height: number;
-  frontPhoto?: string;
-  sidePhoto?: string;
+  front_photo?: string;
+  side_photo?: string;
 }
 
-interface AIMetrics {
+interface AIGeneratedMetric {
   id: string;
   date: string;
-  bodyFat: number;
-  muscleMass: number;
+  body_fat: number;
+  muscle_mass: number;
   waist: number;
   hip: number;
   chest: number;
@@ -48,382 +34,307 @@ interface AIMetrics {
 
 const ClientProfile = () => {
   const { user } = useAuth();
+  const { canAccessAICoach } = useSubscriptionAccess();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [metricsDialogOpen, setMetricsDialogOpen] = useState(false);
-  
-  // Mock data for body metrics
-  const [bodyMetrics] = useState<BodyMetrics[]>([
-    {
-      id: '1',
-      date: '2024-01-15',
-      gender: 'male',
-      age: 28,
-      weight: 75,
-      height: 175,
-      frontPhoto: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=300&fit=crop',
-      sidePhoto: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=300&fit=crop'
-    }
-  ]);
-
-  const [aiMetrics] = useState<AIMetrics[]>([
-    {
-      id: '1',
-      date: '2024-01-15',
-      bodyFat: 15.2,
-      muscleMass: 42.8,
-      waist: 82,
-      hip: 95,
-      chest: 102,
-      arm: 35,
-      bmi: 24.5
-    }
-  ]);
-
-  const [newMetrics, setNewMetrics] = useState({
-    gender: 'male',
-    age: '',
-    weight: '',
-    height: '',
-    frontPhoto: '',
-    sidePhoto: ''
-  });
-
-  const [profileData, setProfileData] = useState({
+  const [editForm, setEditForm] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: '+216 12 345 678'
+    phone: '',
+    avatar: user?.avatar || ''
   });
 
+  const [bodyMetrics, setBodyMetrics] = useState<BodyMetric[]>([
+    {
+      id: '1',
+      date: '2023-01-01',
+      gender: 'male',
+      age: 30,
+      weight: 80,
+      height: 180,
+      front_photo: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=100&h=100&fit=crop&crop=face',
+      side_photo: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=100&h=100&fit=crop&crop=face'
+    },
+    {
+      id: '2',
+      date: '2023-02-01',
+      gender: 'male',
+      age: 30,
+      weight: 79,
+      height: 180,
+      front_photo: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=100&h=100&fit=crop&crop=face',
+      side_photo: 'https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=100&h=100&fit=crop&crop=face'
+    }
+  ]);
+
+  const [aiGeneratedMetrics, setAiGeneratedMetrics] = useState<AIGeneratedMetric[]>([
+    {
+      id: '1',
+      date: '2023-01-01',
+      body_fat: 20,
+      muscle_mass: 40,
+      waist: 80,
+      hip: 90,
+      chest: 100,
+      arm: 30,
+      bmi: 25
+    },
+    {
+      id: '2',
+      date: '2023-02-01',
+      body_fat: 19,
+      muscle_mass: 41,
+      waist: 79,
+      hip: 89,
+      chest: 99,
+      arm: 31,
+      bmi: 24
+    }
+  ]);
+
   const handleSaveProfile = () => {
+    // Mock save functionality
     toast({
-      title: "Profil mis à jour",
-      description: "Vos informations ont été sauvegardées avec succès.",
+      title: "Profile Updated",
+      description: "Your profile has been updated successfully.",
     });
     setIsEditing(false);
   };
 
   const handleAddMetrics = () => {
-    if (!newMetrics.age || !newMetrics.weight || !newMetrics.height) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Simulate adding new metrics
+    // Mock add metrics functionality
     toast({
-      title: "Métriques ajoutées",
-      description: "Vos nouvelles mesures corporelles ont été enregistrées.",
-    });
-    setMetricsDialogOpen(false);
-    setNewMetrics({
-      gender: 'male',
-      age: '',
-      weight: '',
-      height: '',
-      frontPhoto: '',
-      sidePhoto: ''
+      title: "Metrics Added",
+      description: "New body metrics have been recorded.",
     });
   };
-
-  const handleShareProgress = () => {
-    toast({
-      title: "Partage en cours",
-      description: "Votre tableau de bord de progression sera partagé sur vos réseaux sociaux.",
-    });
-  };
-
-  const latestBodyMetrics = bodyMetrics[0];
-  const latestAIMetrics = aiMetrics[0];
 
   return (
     <DashboardLayout role="client">
       <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
-                <User className="w-10 h-10" />
+        {/* Profile Header */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <img 
+                    src={editForm.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'} 
+                    alt="Profile"
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
+                  {isEditing && (
+                    <Button size="sm" className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full">
+                      <Camera className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                <div>
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      <Input 
+                        value={editForm.name}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="Full Name"
+                      />
+                      <Input 
+                        value={editForm.email}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                        placeholder="Email"
+                        type="email"
+                      />
+                      <Input 
+                        value={editForm.phone}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
+                        placeholder="Phone Number"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <h1 className="text-2xl font-bold">{editForm.name}</h1>
+                      <p className="text-gray-600">{editForm.email}</p>
+                      {editForm.phone && <p className="text-gray-600">{editForm.phone}</p>}
+                    </>
+                  )}
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold">{user?.name}</h1>
-                <p className="text-blue-100">Membre SportFlare</p>
-                <Badge className="bg-purple-500 text-white mt-2">
-                  Plan Premium
-                </Badge>
+              <div className="flex gap-2">
+                {isEditing ? (
+                  <>
+                    <Button variant="outline" onClick={() => setIsEditing(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSaveProfile}>
+                      Save Changes
+                    </Button>
+                  </>
+                ) : (
+                  <Button onClick={() => setIsEditing(true)}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                )}
               </div>
             </div>
-            <Button 
-              onClick={handleShareProgress}
-              variant="outline" 
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-            >
-              <Share2 className="w-4 h-4 mr-2" />
-              Partager Progrès
-            </Button>
-          </div>
+          </CardHeader>
+        </Card>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/client/book-classes')}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-blue-600" />
+                Class Schedule
+              </CardTitle>
+              <CardDescription>View and book your fitness classes</CardDescription>
+            </CardHeader>
+          </Card>
+
+          {canAccessAICoach() ? (
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/client/ai-coach')}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-purple-600" />
+                  AI Coach
+                </CardTitle>
+                <CardDescription>Get personalized fitness guidance</CardDescription>
+              </CardHeader>
+            </Card>
+          ) : (
+            <Card className="opacity-75">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="w-5 h-5 text-gray-400" />
+                  AI Coach
+                </CardTitle>
+                <CardDescription>Upgrade to Plus or Premium to access</CardDescription>
+              </CardHeader>
+            </Card>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile Information */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    Informations Personnelles
-                  </CardTitle>
-                  <Button 
-                    onClick={() => setIsEditing(!isEditing)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <Edit className="w-4 h-4 mr-1" />
-                    {isEditing ? 'Annuler' : 'Modifier'}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="name">Nom Complet</Label>
-                    <Input
-                      id="name"
-                      value={profileData.name}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={profileData.email}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Téléphone</Label>
-                    <Input
-                      id="phone"
-                      value={profileData.phone}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                </div>
-                
-                {isEditing && (
-                  <div className="flex gap-2 pt-4">
-                    <Button onClick={handleSaveProfile} className="flex-1">
-                      Sauvegarder
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setIsEditing(false)}
-                      className="flex-1"
-                    >
-                      Annuler
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Body Metrics Table */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Dernières Métriques Corporelles</CardTitle>
-                  <Dialog open={metricsDialogOpen} onOpenChange={setMetricsDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm">
-                        <Camera className="w-4 h-4 mr-1" />
-                        Ajouter Métriques
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Nouvelles Métriques Corporelles</DialogTitle>
-                        <DialogDescription>
-                          Ajoutez vos nouvelles mesures pour un suivi précis
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Genre</Label>
-                            <Select value={newMetrics.gender} onValueChange={(value) => setNewMetrics(prev => ({ ...prev, gender: value }))}>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="male">Homme</SelectItem>
-                                <SelectItem value="female">Femme</SelectItem>
-                                <SelectItem value="other">Autre</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label>Âge</Label>
-                            <Input
-                              type="number"
-                              value={newMetrics.age}
-                              onChange={(e) => setNewMetrics(prev => ({ ...prev, age: e.target.value }))}
-                              placeholder="Ex: 25"
-                            />
-                          </div>
-                          <div>
-                            <Label>Poids (kg)</Label>
-                            <Input
-                              type="number"
-                              value={newMetrics.weight}
-                              onChange={(e) => setNewMetrics(prev => ({ ...prev, weight: e.target.value }))}
-                              placeholder="Ex: 70"
-                            />
-                          </div>
-                          <div>
-                            <Label>Taille (cm)</Label>
-                            <Input
-                              type="number"
-                              value={newMetrics.height}
-                              onChange={(e) => setNewMetrics(prev => ({ ...prev, height: e.target.value }))}
-                              placeholder="Ex: 175"
-                            />
-                          </div>
+        {/* Body Metrics */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Latest Body Metrics</CardTitle>
+                <CardDescription>Your most recent measurements</CardDescription>
+              </div>
+              <Button onClick={handleAddMetrics}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Metrics
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2">Date</th>
+                    <th className="text-left p-2">Gender</th>
+                    <th className="text-left p-2">Age</th>
+                    <th className="text-left p-2">Weight (kg)</th>
+                    <th className="text-left p-2">Height (cm)</th>
+                    <th className="text-left p-2">Photos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bodyMetrics.map((metric) => (
+                    <tr key={metric.id} className="border-b">
+                      <td className="p-2">{new Date(metric.date).toLocaleDateString()}</td>
+                      <td className="p-2 capitalize">{metric.gender}</td>
+                      <td className="p-2">{metric.age}</td>
+                      <td className="p-2">{metric.weight}</td>
+                      <td className="p-2">{metric.height}</td>
+                      <td className="p-2">
+                        <div className="flex gap-2">
+                          {metric.front_photo && (
+                            <img src={metric.front_photo} alt="Front" className="w-8 h-8 rounded object-cover" />
+                          )}
+                          {metric.side_photo && (
+                            <img src={metric.side_photo} alt="Side" className="w-8 h-8 rounded object-cover" />
+                          )}
                         </div>
-                      </div>
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setMetricsDialogOpen(false)}>
-                          Annuler
-                        </Button>
-                        <Button onClick={handleAddMetrics}>
-                          Ajouter
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {latestBodyMetrics ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Date</p>
-                      <p className="font-semibold">{new Date(latestBodyMetrics.date).toLocaleDateString('fr-FR')}</p>
-                    </div>
-                    <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Poids</p>
-                      <p className="font-semibold">{latestBodyMetrics.weight} kg</p>
-                    </div>
-                    <div className="text-center p-3 bg-purple-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Taille</p>
-                      <p className="font-semibold">{latestBodyMetrics.height} cm</p>
-                    </div>
-                    <div className="text-center p-3 bg-orange-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Âge</p>
-                      <p className="font-semibold">{latestBodyMetrics.age} ans</p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-4">Aucune métrique enregistrée</p>
-                )}
-              </CardContent>
-            </Card>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* AI Generated Metrics */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="w-5 h-5" />
-                  Métriques Générées par l'IA Coach
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {latestAIMetrics ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-3 bg-red-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Graisse Corporelle</p>
-                      <p className="font-semibold">{latestAIMetrics.bodyFat}%</p>
-                    </div>
-                    <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Masse Musculaire</p>
-                      <p className="font-semibold">{latestAIMetrics.muscleMass}%</p>
-                    </div>
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Tour de Taille</p>
-                      <p className="font-semibold">{latestAIMetrics.waist} cm</p>
-                    </div>
-                    <div className="text-center p-3 bg-purple-50 rounded-lg">
-                      <p className="text-sm text-gray-600">IMC</p>
-                      <p className="font-semibold">{latestAIMetrics.bmi}</p>
-                    </div>
-                    <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Tour de Hanches</p>
-                      <p className="font-semibold">{latestAIMetrics.hip} cm</p>
-                    </div>
-                    <div className="text-center p-3 bg-indigo-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Tour de Poitrine</p>
-                      <p className="font-semibold">{latestAIMetrics.chest} cm</p>
-                    </div>
-                    <div className="text-center p-3 bg-pink-50 rounded-lg">
-                      <p className="text-sm text-gray-600">Tour de Bras</p>
-                      <p className="font-semibold">{latestAIMetrics.arm} cm</p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-4">Aucune analyse IA disponible</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+        {/* AI Generated Metrics */}
+        <Card>
+          <CardHeader>
+            <CardTitle>AI Generated Metrics</CardTitle>
+            <CardDescription>Insights from your body metrics</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2">Date</th>
+                    <th className="text-left p-2">Body Fat</th>
+                    <th className="text-left p-2">Muscle Mass</th>
+                    <th className="text-left p-2">Waist</th>
+                    <th className="text-left p-2">Hip</th>
+                    <th className="text-left p-2">Chest</th>
+                    <th className="text-left p-2">Arm</th>
+                    <th className="text-left p-2">BMI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {aiGeneratedMetrics.map((metric) => (
+                    <tr key={metric.id} className="border-b">
+                      <td className="p-2">{new Date(metric.date).toLocaleDateString()}</td>
+                      <td className="p-2">{metric.body_fat}</td>
+                      <td className="p-2">{metric.muscle_mass}</td>
+                      <td className="p-2">{metric.waist}</td>
+                      <td className="p-2">{metric.hip}</td>
+                      <td className="p-2">{metric.chest}</td>
+                      <td className="p-2">{metric.arm}</td>
+                      <td className="p-2">{metric.bmi}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Quick Actions */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="w-5 h-5" />
-                  Actions Rapides
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button className="w-full" onClick={() => window.location.href = '/client/book-classes'}>
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Planning des Cours
+        {/* Social Sharing */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Share className="w-5 h-5" />
+              Share Progress
+            </CardTitle>
+            <CardDescription>Share your fitness journey on social media</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
+              <h3 className="font-semibold mb-2">Progress Dashboard Ready!</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Your fitness progress is ready to be shared. This includes your achievements without sensitive data.
+              </p>
+              <div className="flex gap-2">
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  <Share className="w-4 h-4 mr-2" />
+                  Share on Instagram
                 </Button>
-                <Button className="w-full" variant="outline" onClick={() => window.location.href = '/client/ai-coach'}>
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Coach IA
+                <Button size="sm" variant="outline">
+                  <Share className="w-4 h-4 mr-2" />
+                  Share on Facebook
                 </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Objectifs Actuels</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="p-3 bg-blue-50 rounded-lg">
-                    <p className="font-medium text-blue-900">Perte de Graisse</p>
-                    <p className="text-sm text-blue-700">Objectif: -5kg d'ici Mars 2024</p>
-                  </div>
-                  <div className="p-3 bg-green-50 rounded-lg">
-                    <p className="font-medium text-green-900">Gain Musculaire</p>
-                    <p className="text-sm text-green-700">+2kg de masse musculaire</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

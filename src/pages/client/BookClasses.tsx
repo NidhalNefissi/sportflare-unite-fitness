@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,7 +34,6 @@ const BookClasses = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [selectedClass, setSelectedClass] = useState<any>(null);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('online');
 
   const filteredClasses = useMemo(() => {
     return availableClasses.filter(cls => {
@@ -54,8 +52,8 @@ const BookClasses = () => {
   const handleBookClass = async () => {
     if (!canAccessClasses()) {
       toast({
-        title: "Accès restreint",
-        description: "Vous devez avoir un plan Plus ou Premium pour réserver des cours.",
+        title: "Access Restricted",
+        description: "You need a Plus or Premium plan to book classes.",
         variant: "destructive"
       });
       return;
@@ -68,8 +66,8 @@ const BookClasses = () => {
       setBookingDialogOpen(false);
       setSelectedClass(null);
       toast({
-        title: "Cours réservé !",
-        description: `Votre place pour ${selectedClass.name} a été confirmée.`,
+        title: "Class Booked!",
+        description: `Your spot for ${selectedClass.name} has been confirmed.`,
       });
     }
   };
@@ -85,9 +83,9 @@ const BookClasses = () => {
 
   const getDifficultyLabel = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'Débutant';
-      case 'intermediate': return 'Intermédiaire';
-      case 'advanced': return 'Avancé';
+      case 'beginner': return 'Beginner';
+      case 'intermediate': return 'Intermediate';
+      case 'advanced': return 'Advanced';
       default: return difficulty;
     }
   };
@@ -110,23 +108,23 @@ const BookClasses = () => {
             <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto">
               <Lock className="w-12 h-12 text-orange-600" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Accès Restreint</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Access Restricted</h1>
             <p className="text-gray-600 max-w-md">
-              Vous devez avoir un plan Plus ou Premium pour accéder au planning des cours et réserver vos séances.
+              You need a Plus or Premium plan to access class schedules and book sessions.
             </p>
           </div>
           
           <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg border border-orange-200 max-w-md">
-            <h3 className="font-semibold text-orange-900 mb-2">Plan actuel: {currentPlan?.charAt(0).toUpperCase() + currentPlan?.slice(1)}</h3>
+            <h3 className="font-semibold text-orange-900 mb-2">Current Plan: {currentPlan?.charAt(0).toUpperCase() + currentPlan?.slice(1)}</h3>
             <p className="text-sm text-orange-700 mb-4">
-              Débloquez l'accès aux cours collectifs, aux coaches et à l'IA Coach avec nos plans premium.
+              Unlock access to group classes, coaches, and AI Coach with our premium plans.
             </p>
             <Button 
               className="w-full bg-orange-600 hover:bg-orange-700"
               onClick={() => window.location.href = '/client/subscriptions'}
             >
               <Crown className="w-4 h-4 mr-2" />
-              Choisir un Plan
+              Choose a Plan
             </Button>
           </div>
         </div>
@@ -139,14 +137,14 @@ const BookClasses = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-red-600 to-pink-600 rounded-xl p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">Planning des Cours</h1>
-          <p className="text-red-100">Découvrez et réservez vos cours fitness préférés</p>
+          <h1 className="text-2xl font-bold mb-2">Class Schedule</h1>
+          <p className="text-red-100">Discover and book your favorite fitness classes</p>
           
           {currentPlan !== 'premium' && (
             <div className="mt-4 p-3 bg-white/10 rounded-lg">
               <p className="text-sm">
                 <Calendar className="w-4 h-4 inline mr-1" />
-                Plan {currentPlan}: {getBookingLimit()} réservation par jour
+                {currentPlan} plan: {getBookingLimit()} booking per day
               </p>
             </div>
           )}
@@ -157,7 +155,7 @@ const BookClasses = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Filter className="w-5 h-5" />
-              Filtres de Recherche
+              Filter Search
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -165,7 +163,7 @@ const BookClasses = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Rechercher cours, salle ou coach..."
+                  placeholder="Search classes, gym, or coach..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -174,10 +172,10 @@ const BookClasses = () => {
               
               <Select value={selectedGym} onValueChange={setSelectedGym}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Salle de sport" />
+                  <SelectValue placeholder="Gym" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Toutes les salles</SelectItem>
+                  <SelectItem value="all">All Gyms</SelectItem>
                   <SelectItem value="gym1">FitZone Tunis</SelectItem>
                   <SelectItem value="gym2">PowerGym Sfax</SelectItem>
                   <SelectItem value="gym3">Zen Wellness</SelectItem>
@@ -193,13 +191,13 @@ const BookClasses = () => {
 
               <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Niveau" />
+                  <SelectValue placeholder="Difficulty" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tous niveaux</SelectItem>
-                  <SelectItem value="beginner">Débutant</SelectItem>
-                  <SelectItem value="intermediate">Intermédiaire</SelectItem>
-                  <SelectItem value="advanced">Avancé</SelectItem>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -218,6 +216,9 @@ const BookClasses = () => {
                       <MapPin className="w-3 h-3" />
                       {classItem.gym.name}
                     </CardDescription>
+                    <Badge variant="outline" className="mt-2">
+                      {classItem.type === 'single' ? 'Single Session' : 'Full Course'}
+                    </Badge>
                   </div>
                   <Badge className={getDifficultyColor(classItem.difficulty)}>
                     {getDifficultyLabel(classItem.difficulty)}
@@ -267,7 +268,7 @@ const BookClasses = () => {
                 {/* Progress Bar */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs text-gray-600">
-                    <span>Places réservées</span>
+                    <span>Places reserved</span>
                     <span>{Math.round((classItem.booked / classItem.capacity) * 100)}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -286,15 +287,15 @@ const BookClasses = () => {
                       disabled={classItem.booked >= classItem.capacity}
                       onClick={() => setSelectedClass(classItem)}
                     >
-                      {classItem.booked >= classItem.capacity ? 'Complet' : 'Réserver'}
+                      {classItem.booked >= classItem.capacity ? 'Full' : 'Book Now'}
                       <Dumbbell className="w-4 h-4 ml-2" />
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Confirmation de Réservation</DialogTitle>
+                      <DialogTitle>Booking Confirmation</DialogTitle>
                       <DialogDescription>
-                        Confirmez votre réservation pour {selectedClass?.name}
+                        Confirm your booking for {selectedClass?.name}
                       </DialogDescription>
                     </DialogHeader>
                     
@@ -308,37 +309,23 @@ const BookClasses = () => {
                           </p>
                           <p className="text-sm text-gray-600">
                             <Calendar className="w-3 h-3 inline mr-1" />
-                            {formatDate(selectedClass.date)} à {selectedClass.startTime}
+                            {formatDate(selectedClass.date)} at {selectedClass.startTime}
                           </p>
                           <p className="text-sm text-gray-600">
                             <Users className="w-3 h-3 inline mr-1" />
                             Coach: {selectedClass.coach.name}
                           </p>
-                        </div>
-
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">Mode de confirmation</Label>
-                          <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="online" id="online" />
-                              <Label htmlFor="online" className="cursor-pointer flex items-center space-x-2">
-                                <CreditCard className="w-4 h-4" />
-                                <span>Confirmation en ligne (Flouci.tn)</span>
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="gym" id="gym" />
-                              <Label htmlFor="gym" className="cursor-pointer flex items-center space-x-2">
-                                <MapPin className="w-4 h-4" />
-                                <span>Confirmation à la salle</span>
-                              </Label>
-                            </div>
-                          </RadioGroup>
+                          <Badge variant="outline">
+                            {selectedClass.type === 'single' ? 'Single Session' : 'Full Course'}
+                          </Badge>
                         </div>
 
                         <div className="bg-blue-50 p-3 rounded-lg">
                           <p className="text-sm text-blue-800">
-                            💡 <strong>Inclus dans votre abonnement</strong> - Aucun frais supplémentaire
+                            💡 <strong>Included in your subscription</strong> - No additional fees
+                          </p>
+                          <p className="text-xs text-blue-600 mt-1">
+                            Cancellation allowed up to 24 hours before class starts
                           </p>
                         </div>
 
@@ -348,13 +335,13 @@ const BookClasses = () => {
                             onClick={() => setBookingDialogOpen(false)}
                             className="flex-1"
                           >
-                            Annuler
+                            Cancel
                           </Button>
                           <Button 
                             onClick={handleBookClass}
                             className="flex-1 bg-red-600 hover:bg-red-700"
                           >
-                            Confirmer la Réservation
+                            Confirm Booking
                           </Button>
                         </div>
                       </div>
@@ -370,8 +357,8 @@ const BookClasses = () => {
           <Card>
             <CardContent className="text-center py-12">
               <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun cours trouvé</h3>
-              <p className="text-gray-600">Essayez d'ajuster vos critères de recherche.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No classes found</h3>
+              <p className="text-gray-600">Try adjusting your search criteria.</p>
             </CardContent>
           </Card>
         )}
