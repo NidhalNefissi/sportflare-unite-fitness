@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,10 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import { useBooking } from '@/contexts/BookingContext';
 import { useSubscriptionAccess } from '@/hooks/useSubscriptionAccess';
+import { mockClasses } from '@/data/mockClasses';
 import { 
   Search, 
   Filter, 
@@ -18,7 +18,6 @@ import {
   Users, 
   Star,
   Calendar,
-  CreditCard,
   Dumbbell,
   Crown,
   Lock
@@ -26,7 +25,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 
 const BookClasses = () => {
-  const { availableClasses, bookClass } = useBooking();
+  const { bookClass } = useBooking();
   const { currentPlan, canAccessClasses, getBookingLimit } = useSubscriptionAccess();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGym, setSelectedGym] = useState('all');
@@ -36,7 +35,7 @@ const BookClasses = () => {
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
 
   const filteredClasses = useMemo(() => {
-    return availableClasses.filter(cls => {
+    return mockClasses.filter(cls => {
       const matchesSearch = cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            cls.gym.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            cls.coach.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -47,7 +46,7 @@ const BookClasses = () => {
       
       return matchesSearch && matchesGym && matchesDate && matchesDifficulty;
     });
-  }, [availableClasses, searchTerm, selectedGym, selectedDate, selectedDifficulty]);
+  }, [searchTerm, selectedGym, selectedDate, selectedDifficulty]);
 
   const handleBookClass = async () => {
     if (!canAccessClasses()) {
@@ -81,18 +80,17 @@ const BookClasses = () => {
     }
   };
 
-  const getDifficultyLabel = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner': return 'Beginner';
-      case 'intermediate': return 'Intermediate';
-      case 'advanced': return 'Advanced';
-      default: return difficulty;
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'single': return 'bg-blue-100 text-blue-800';
+      case 'program': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('fr-FR', { 
+    return date.toLocaleDateString('en-US', { 
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
@@ -137,7 +135,7 @@ const BookClasses = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-red-600 to-pink-600 rounded-xl p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">Class Schedule</h1>
+          <h1 className="text-2xl font-bold mb-2">Book Classes</h1>
           <p className="text-red-100">Discover and book your favorite fitness classes</p>
           
           {currentPlan !== 'premium' && (
@@ -176,9 +174,9 @@ const BookClasses = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Gyms</SelectItem>
-                  <SelectItem value="gym1">FitZone Tunis</SelectItem>
-                  <SelectItem value="gym2">PowerGym Sfax</SelectItem>
-                  <SelectItem value="gym3">Zen Wellness</SelectItem>
+                  <SelectItem value="gym-1">FitZone Tunis</SelectItem>
+                  <SelectItem value="gym-2">Zen Wellness</SelectItem>
+                  <SelectItem value="gym-3">PowerGym</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -216,13 +214,15 @@ const BookClasses = () => {
                       <MapPin className="w-3 h-3" />
                       {classItem.gym.name}
                     </CardDescription>
-                    <Badge variant="outline" className="mt-2">
-                      {classItem.type === 'single' ? 'Single Session' : 'Full Course'}
-                    </Badge>
+                    <div className="flex gap-2 mt-2">
+                      <Badge className={getTypeColor(classItem.type)}>
+                        {classItem.type === 'single' ? 'Single Session' : 'Full Program'}
+                      </Badge>
+                      <Badge className={getDifficultyColor(classItem.difficulty)}>
+                        {classItem.difficulty.charAt(0).toUpperCase() + classItem.difficulty.slice(1)}
+                      </Badge>
+                    </div>
                   </div>
-                  <Badge className={getDifficultyColor(classItem.difficulty)}>
-                    {getDifficultyLabel(classItem.difficulty)}
-                  </Badge>
                 </div>
               </CardHeader>
               
@@ -246,7 +246,7 @@ const BookClasses = () => {
                   
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Users className="w-4 h-4" />
-                    {classItem.booked}/{classItem.capacity} places
+                    {classItem.booked}/{classItem.capacity} spots
                   </div>
                 </div>
 
@@ -268,7 +268,7 @@ const BookClasses = () => {
                 {/* Progress Bar */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs text-gray-600">
-                    <span>Places reserved</span>
+                    <span>Spots Reserved</span>
                     <span>{Math.round((classItem.booked / classItem.capacity) * 100)}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -315,8 +315,8 @@ const BookClasses = () => {
                             <Users className="w-3 h-3 inline mr-1" />
                             Coach: {selectedClass.coach.name}
                           </p>
-                          <Badge variant="outline">
-                            {selectedClass.type === 'single' ? 'Single Session' : 'Full Course'}
+                          <Badge className={getTypeColor(selectedClass.type)}>
+                            {selectedClass.type === 'single' ? 'Single Session' : 'Full Program'}
                           </Badge>
                         </div>
 
