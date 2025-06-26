@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,107 +6,150 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { useBooking } from '@/contexts/BookingContext';
-import { mockGyms } from '@/data/mockData';
-import { Calendar, Clock, MapPin, Users, Star, Search, Filter } from 'lucide-react';
+import { useSubscriptionAccess } from '@/hooks/useSubscriptionAccess';
+import { 
+  Search, 
+  Filter, 
+  MapPin, 
+  Clock, 
+  Users, 
+  Star,
+  Calendar,
+  CreditCard,
+  Dumbbell,
+  Crown,
+  Lock
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const BookClasses = () => {
   const { availableClasses, bookClass } = useBooking();
+  const { currentPlan, canAccessClasses, getBookingLimit } = useSubscriptionAccess();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedGym, setSelectedGym] = useState('all');
+  const [selectedDate, setSelectedDate] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
-  const [sortBy, setSortBy] = useState('date');
-  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState<any>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online' | 'in_person'>('online');
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('online');
 
   const filteredClasses = useMemo(() => {
-    let filtered = availableClasses.filter(classItem => {
-      const matchesSearch = classItem.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           classItem.coach.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           classItem.gym.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return availableClasses.filter(cls => {
+      const matchesSearch = cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           cls.gym.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           cls.coach.name.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesCategory = selectedCategory === 'all' || classItem.category.toLowerCase() === selectedCategory;
-      const matchesDifficulty = selectedDifficulty === 'all' || classItem.difficulty.toLowerCase() === selectedDifficulty;
+      const matchesGym = selectedGym === 'all' || cls.gym.id === selectedGym;
+      const matchesDate = !selectedDate || cls.date === selectedDate;
+      const matchesDifficulty = selectedDifficulty === 'all' || cls.difficulty === selectedDifficulty;
       
-      return matchesSearch && matchesCategory && matchesDifficulty;
+      return matchesSearch && matchesGym && matchesDate && matchesDifficulty;
     });
+  }, [availableClasses, searchTerm, selectedGym, selectedDate, selectedDifficulty]);
 
-    // Sort classes
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'price':
-          return a.price - b.price;
-        case 'rating':
-          return b.coach.rating - a.coach.rating;
-        case 'date':
-        default:
-          return new Date(a.date + 'T' + a.startTime).getTime() - new Date(b.date + 'T' + b.startTime).getTime();
-      }
-    });
+  const handleBookClass = async () => {
+    if (!canAccessClasses()) {
+      toast({
+        title: "Accès restreint",
+        description: "Vous devez avoir un plan Plus ou Premium pour réserver des cours.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    return filtered;
-  }, [availableClasses, searchTerm, selectedCategory, selectedDifficulty, sortBy]);
+    if (!selectedClass) return;
 
-  const handleBookClass = async (classSchedule: any) => {
-    setSelectedClass(classSchedule);
-    setBookingDialogOpen(true);
+    const success = await bookClass(selectedClass);
+    if (success) {
+      setBookingDialogOpen(false);
+      setSelectedClass(null);
+      toast({
+        title: "Cours réservé !",
+        description: `Votre place pour ${selectedClass.name} a été confirmée.`,
+      });
+    }
   };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Beginner': return 'bg-green-100 text-green-800';
-      case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'Advanced': return 'bg-red-100 text-red-800';
+      case 'beginner': return 'bg-green-100 text-green-800';
+      case 'intermediate': return 'bg-yellow-100 text-yellow-800';
+      case 'advanced': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getDifficultyLabel = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner': return 'Débutant';
+      case 'intermediate': return 'Intermédiaire';
+      case 'advanced': return 'Avancé';
+      default: return difficulty;
     }
   };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
-    } else if (date.toDateString() === tomorrow.toDateString()) {
-      return 'Tomorrow';
-    } else {
-      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    }
+    return date.toLocaleDateString('fr-FR', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
   };
 
-  const confirmBooking = async () => {
-    if (selectedClass) {
-      const bookingData = {
-        ...selectedClass,
-        paymentMethod,
-        paymentStatus: paymentMethod === 'online' ? 'pending' : 'pay_at_gym'
-      };
-      
-      await bookClass(bookingData);
-      setBookingDialogOpen(false);
-      setSelectedClass(null);
-      
-      toast({
-        title: "Class Booked!",
-        description: paymentMethod === 'online' 
-          ? "Payment will be processed shortly." 
-          : "Please pay at the gym before your class.",
-      });
-    }
-  };
+  if (!canAccessClasses()) {
+    return (
+      <DashboardLayout role="client">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+          <div className="text-center space-y-4">
+            <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto">
+              <Lock className="w-12 h-12 text-orange-600" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Accès Restreint</h1>
+            <p className="text-gray-600 max-w-md">
+              Vous devez avoir un plan Plus ou Premium pour accéder au planning des cours et réserver vos séances.
+            </p>
+          </div>
+          
+          <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg border border-orange-200 max-w-md">
+            <h3 className="font-semibold text-orange-900 mb-2">Plan actuel: {currentPlan?.charAt(0).toUpperCase() + currentPlan?.slice(1)}</h3>
+            <p className="text-sm text-orange-700 mb-4">
+              Débloquez l'accès aux cours collectifs, aux coaches et à l'IA Coach avec nos plans premium.
+            </p>
+            <Button 
+              className="w-full bg-orange-600 hover:bg-orange-700"
+              onClick={() => window.location.href = '/client/subscriptions'}
+            >
+              <Crown className="w-4 h-4 mr-2" />
+              Choisir un Plan
+            </Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout role="client">
       <div className="space-y-6">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">Book a Class</h1>
-          <p className="text-blue-100">Find and book the perfect workout for you</p>
+        <div className="bg-gradient-to-r from-red-600 to-pink-600 rounded-xl p-6 text-white">
+          <h1 className="text-2xl font-bold mb-2">Planning des Cours</h1>
+          <p className="text-red-100">Découvrez et réservez vos cours fitness préférés</p>
+          
+          {currentPlan !== 'premium' && (
+            <div className="mt-4 p-3 bg-white/10 rounded-lg">
+              <p className="text-sm">
+                <Calendar className="w-4 h-4 inline mr-1" />
+                Plan {currentPlan}: {getBookingLimit()} réservation par jour
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Filters */}
@@ -113,202 +157,221 @@ const BookClasses = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Filter className="w-5 h-5" />
-              Filter Classes
+              Filtres de Recherche
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search classes, coaches, or gyms..."
+                  placeholder="Rechercher cours, salle ou coach..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
               
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select value={selectedGym} onValueChange={setSelectedGym}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Category" />
+                  <SelectValue placeholder="Salle de sport" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="cardio">Cardio</SelectItem>
-                  <SelectItem value="strength">Strength</SelectItem>
-                  <SelectItem value="yoga">Yoga</SelectItem>
-                  <SelectItem value="pilates">Pilates</SelectItem>
+                  <SelectItem value="all">Toutes les salles</SelectItem>
+                  <SelectItem value="gym1">FitZone Tunis</SelectItem>
+                  <SelectItem value="gym2">PowerGym Sfax</SelectItem>
+                  <SelectItem value="gym3">Zen Wellness</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+              />
 
               <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Difficulty" />
+                  <SelectValue placeholder="Niveau" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="date">Date & Time</SelectItem>
-                  <SelectItem value="price">Price</SelectItem>
-                  <SelectItem value="rating">Coach Rating</SelectItem>
+                  <SelectItem value="all">Tous niveaux</SelectItem>
+                  <SelectItem value="beginner">Débutant</SelectItem>
+                  <SelectItem value="intermediate">Intermédiaire</SelectItem>
+                  <SelectItem value="advanced">Avancé</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </CardContent>
         </Card>
 
-        {/* Class Results */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Classes List */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredClasses.map((classItem) => (
             <Card key={classItem.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
+                  <div>
                     <CardTitle className="text-lg">{classItem.name}</CardTitle>
-                    <CardDescription className="flex items-center gap-2 mt-1">
+                    <CardDescription className="flex items-center gap-1 mt-1">
                       <MapPin className="w-3 h-3" />
-                      {classItem.gym.name} • {classItem.gym.location}
+                      {classItem.gym.name}
                     </CardDescription>
                   </div>
                   <Badge className={getDifficultyColor(classItem.difficulty)}>
-                    {classItem.difficulty}
+                    {getDifficultyLabel(classItem.difficulty)}
                   </Badge>
                 </div>
               </CardHeader>
+              
               <CardContent className="space-y-4">
-                {/* Coach Info */}
-                <div className="flex items-center gap-3">
-                  <img
-                    src={classItem.coach.photo}
-                    alt={classItem.coach.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="font-medium">{classItem.coach.name}</p>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                      <span className="text-sm text-gray-600">{classItem.coach.rating}</span>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Class Details */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center gap-2 text-gray-600">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Users className="w-4 h-4" />
+                    Coach: {classItem.coach.name}
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="w-4 h-4" />
                     {formatDate(classItem.date)}
                   </div>
-                  <div className="flex items-center gap-2 text-gray-600">
+                  
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Clock className="w-4 h-4" />
                     {classItem.startTime} - {classItem.endTime}
                   </div>
-                  <div className="flex items-center gap-2 text-gray-600">
+                  
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Users className="w-4 h-4" />
-                    {classItem.booked}/{classItem.capacity} spots
-                  </div>
-                  <div className="text-lg font-bold text-blue-600">
-                    {classItem.price} TND
+                    {classItem.booked}/{classItem.capacity} places
                   </div>
                 </div>
 
-                {/* Description */}
-                <p className="text-sm text-gray-600">{classItem.description}</p>
+                {/* Rating */}
+                <div className="flex items-center gap-2">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`w-4 h-4 ${i < Math.floor(classItem.coach.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600">
+                    {classItem.coach.rating}/5
+                  </span>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs text-gray-600">
+                    <span>Places réservées</span>
+                    <span>{Math.round((classItem.booked / classItem.capacity) * 100)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      style={{ width: `${(classItem.booked / classItem.capacity) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
 
                 {/* Book Button */}
-                <Button
-                  onClick={() => handleBookClass(classItem)}
-                  disabled={classItem.booked >= classItem.capacity}
-                  className="w-full bg-blue-600 hover:bg-blue-700"
-                >
-                  {classItem.booked >= classItem.capacity ? 'Class Full' : 'Book Class'}
-                </Button>
+                <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      className="w-full bg-red-600 hover:bg-red-700"
+                      disabled={classItem.booked >= classItem.capacity}
+                      onClick={() => setSelectedClass(classItem)}
+                    >
+                      {classItem.booked >= classItem.capacity ? 'Complet' : 'Réserver'}
+                      <Dumbbell className="w-4 h-4 ml-2" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Confirmation de Réservation</DialogTitle>
+                      <DialogDescription>
+                        Confirmez votre réservation pour {selectedClass?.name}
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    {selectedClass && (
+                      <div className="space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                          <h4 className="font-medium">{selectedClass.name}</h4>
+                          <p className="text-sm text-gray-600">
+                            <MapPin className="w-3 h-3 inline mr-1" />
+                            {selectedClass.gym.name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            <Calendar className="w-3 h-3 inline mr-1" />
+                            {formatDate(selectedClass.date)} à {selectedClass.startTime}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            <Users className="w-3 h-3 inline mr-1" />
+                            Coach: {selectedClass.coach.name}
+                          </p>
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium">Mode de confirmation</Label>
+                          <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="online" id="online" />
+                              <Label htmlFor="online" className="cursor-pointer flex items-center space-x-2">
+                                <CreditCard className="w-4 h-4" />
+                                <span>Confirmation en ligne (Flouci.tn)</span>
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="gym" id="gym" />
+                              <Label htmlFor="gym" className="cursor-pointer flex items-center space-x-2">
+                                <MapPin className="w-4 h-4" />
+                                <span>Confirmation à la salle</span>
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <p className="text-sm text-blue-800">
+                            💡 <strong>Inclus dans votre abonnement</strong> - Aucun frais supplémentaire
+                          </p>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setBookingDialogOpen(false)}
+                            className="flex-1"
+                          >
+                            Annuler
+                          </Button>
+                          <Button 
+                            onClick={handleBookClass}
+                            className="flex-1 bg-red-600 hover:bg-red-700"
+                          >
+                            Confirmer la Réservation
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Booking Confirmation Dialog */}
-        <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Confirm Booking</DialogTitle>
-              <DialogDescription>
-                Choose your payment method for {selectedClass?.name}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-medium">{selectedClass?.name}</h4>
-                <p className="text-sm text-gray-600">{selectedClass?.gym.name}</p>
-                <p className="text-sm text-gray-600">
-                  {selectedClass && formatDate(selectedClass.date)} at {selectedClass?.startTime}
-                </p>
-                <p className="text-lg font-bold text-blue-600 mt-2">{selectedClass?.price} TND</p>
-              </div>
-              
-              <div className="space-y-3">
-                <h4 className="font-medium">Payment Method:</h4>
-                <div className="space-y-2">
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="online"
-                      checked={paymentMethod === 'online'}
-                      onChange={(e) => setPaymentMethod(e.target.value as 'online')}
-                      className="text-blue-600"
-                    />
-                    <span>Pay Online (Flouci.tn)</span>
-                  </label>
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="in_person"
-                      checked={paymentMethod === 'in_person'}
-                      onChange={(e) => setPaymentMethod(e.target.value as 'in_person')}
-                      className="text-blue-600"
-                    />
-                    <span>Pay at Gym</span>
-                  </label>
-                </div>
-                
-                {paymentMethod === 'in_person' && (
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-sm text-yellow-800">
-                      Please arrive 15 minutes early to complete payment at the gym reception.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setBookingDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={confirmBooking} className="bg-blue-600 hover:bg-blue-700">
-                Confirm Booking
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
         {filteredClasses.length === 0 && (
           <Card>
             <CardContent className="text-center py-12">
               <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No classes found</h3>
-              <p className="text-gray-600">Try adjusting your search or filter criteria.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun cours trouvé</h3>
+              <p className="text-gray-600">Essayez d'ajuster vos critères de recherche.</p>
             </CardContent>
           </Card>
         )}
