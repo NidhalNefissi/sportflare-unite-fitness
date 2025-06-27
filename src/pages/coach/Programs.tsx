@@ -11,23 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Star, Users, TrendingUp, Edit, Trash2, MapPin } from 'lucide-react';
-
-interface TrainingProgram {
-  id: string;
-  name: string;
-  description: string;
-  duration: string;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-  category: string;
-  type: 'single' | 'program';
-  image: string;
-  rating: number;
-  sales: number;
-  revenue: number;
-  features: string[];
-  gym?: string;
-  studio?: string;
-}
+import { TrainingProgram, ProgramLevel, ProgramType, ProgramCategory } from '@/types/program';
 
 const CoachPrograms = () => {
   const [programs, setPrograms] = useState<TrainingProgram[]>([
@@ -87,9 +71,9 @@ const CoachPrograms = () => {
     name: '',
     description: '',
     duration: '',
-    difficulty: 'Beginner' as const,
-    category: '',
-    type: 'single' as const,
+    difficulty: 'Beginner' as ProgramLevel,
+    category: 'Weight Loss' as ProgramCategory,
+    type: 'single' as ProgramType,
     features: '',
     gym: '',
     studio: ''
@@ -170,7 +154,7 @@ const CoachPrograms = () => {
       description: '',
       duration: '',
       difficulty: 'Beginner',
-      category: '',
+      category: 'Weight Loss',
       type: 'single',
       features: '',
       gym: '',
@@ -178,7 +162,7 @@ const CoachPrograms = () => {
     });
   };
 
-  const getDifficultyColor = (difficulty: string) => {
+  const getDifficultyColor = (difficulty: ProgramLevel) => {
     switch (difficulty) {
       case 'Beginner': return 'bg-green-100 text-green-800';
       case 'Intermediate': return 'bg-yellow-100 text-yellow-800';
@@ -187,7 +171,7 @@ const CoachPrograms = () => {
     }
   };
 
-  const getTypeColor = (type: string) => {
+  const getTypeColor = (type: ProgramType) => {
     switch (type) {
       case 'single': return 'bg-blue-100 text-blue-800';
       case 'program': return 'bg-purple-100 text-purple-800';
@@ -246,7 +230,7 @@ const CoachPrograms = () => {
                   </div>
                   <div>
                     <Label htmlFor="type">Type</Label>
-                    <Select value={newProgram.type} onValueChange={(value) => setNewProgram(prev => ({ ...prev, type: value as any }))}>
+                    <Select value={newProgram.type} onValueChange={(value: ProgramType) => setNewProgram(prev => ({ ...prev, type: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -280,7 +264,7 @@ const CoachPrograms = () => {
                   </div>
                   <div>
                     <Label htmlFor="difficulty">Difficulty</Label>
-                    <Select value={newProgram.difficulty} onValueChange={(value) => setNewProgram(prev => ({ ...prev, difficulty: value as any }))}>
+                    <Select value={newProgram.difficulty} onValueChange={(value: ProgramLevel) => setNewProgram(prev => ({ ...prev, difficulty: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -296,7 +280,7 @@ const CoachPrograms = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="category">Category</Label>
-                    <Select value={newProgram.category} onValueChange={(value) => setNewProgram(prev => ({ ...prev, category: value }))}>
+                    <Select value={newProgram.category} onValueChange={(value: ProgramCategory) => setNewProgram(prev => ({ ...prev, category: value }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>

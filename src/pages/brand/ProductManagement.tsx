@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,22 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { Package, Plus, Edit, Trash2, Star, TrendingUp, Filter } from 'lucide-react';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice?: number;
-  category: 'Supplements' | 'Equipment';
-  image: string;
-  rating: number;
-  sales: number;
-  stock: number;
-  features: string[];
-  brand: string;
-  status: 'active' | 'inactive' | 'out_of_stock';
-}
+import { Product, ProductCategory } from '@/types/product';
 
 const BrandProductManagement = () => {
   const [products, setProducts] = useState<Product[]>([
@@ -84,7 +68,7 @@ const BrandProductManagement = () => {
     description: '',
     price: 0,
     originalPrice: 0,
-    category: 'Supplements' as const,
+    category: 'Supplements' as ProductCategory,
     features: '',
     brand: '',
     stock: 0,
@@ -177,10 +161,12 @@ const BrandProductManagement = () => {
     }
   };
 
-  const getCategoryColor = (category: string) => {
+  const getCategoryColor = (category: ProductCategory) => {
     switch (category) {
       case 'Supplements': return 'bg-blue-100 text-blue-800';
       case 'Equipment': return 'bg-purple-100 text-purple-800';
+      case 'Apparel': return 'bg-green-100 text-green-800';
+      case 'Accessories': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -297,13 +283,15 @@ const BrandProductManagement = () => {
 
                 <div>
                   <Label htmlFor="category">Category</Label>
-                  <Select value={newProduct.category} onValueChange={(value) => setNewProduct(prev => ({ ...prev, category: value as any }))}>
+                  <Select value={newProduct.category} onValueChange={(value: ProductCategory) => setNewProduct(prev => ({ ...prev, category: value }))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Supplements">Supplements</SelectItem>
                       <SelectItem value="Equipment">Equipment</SelectItem>
+                      <SelectItem value="Apparel">Apparel</SelectItem>
+                      <SelectItem value="Accessories">Accessories</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

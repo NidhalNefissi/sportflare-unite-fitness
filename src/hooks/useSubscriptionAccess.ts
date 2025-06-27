@@ -1,47 +1,47 @@
 
 import { useAuth } from '@/contexts/AuthContext';
-
-export type SubscriptionPlan = 'basic' | 'plus' | 'premium' | null;
+import { SubscriptionTier } from '@/types/subscription';
 
 export const useSubscriptionAccess = () => {
   const { user } = useAuth();
   
   // Mock subscription data - in real app this would come from user profile
-  const currentPlan: SubscriptionPlan = 'premium'; // Mock premium for demo
+  const currentPlan: SubscriptionTier = 'premium'; // Mock premium for demo
   
-  const canAccessClasses = () => {
+  const canAccessClasses = (): boolean => {
     return currentPlan === 'plus' || currentPlan === 'premium';
   };
   
-  const canAccessAICoach = () => {
+  const canAccessAICoach = (): boolean => {
     return currentPlan === 'plus' || currentPlan === 'premium';
   };
   
-  const canAccessGyms = () => {
+  const canAccessGyms = (): boolean => {
     return currentPlan === 'plus' || currentPlan === 'premium';
   };
   
-  const canAccessCoaches = () => {
+  const canAccessCoaches = (): boolean => {
     return currentPlan === 'plus' || currentPlan === 'premium';
   };
   
-  const canBookMultiplePerDay = () => {
+  const canBookMultiplePerDay = (): boolean => {
     return currentPlan === 'premium';
   };
   
-  const getBookingLimit = () => {
-    if (currentPlan === 'basic') {
-      return 0; // No class bookings
-    } else if (currentPlan === 'plus') {
-      return 1; // One per day
-    } else if (currentPlan === 'premium') {
-      return -1; // Unlimited
-    } else {
-      return 0;
+  const getBookingLimit = (): number => {
+    switch (currentPlan) {
+      case 'basic':
+        return 0; // No class bookings
+      case 'plus':
+        return 1; // One per day
+      case 'premium':
+        return -1; // Unlimited
+      default:
+        return 0;
     }
   };
   
-  const needsUpgrade = (feature: string) => {
+  const needsUpgrade = (feature: string): boolean => {
     switch (feature) {
       case 'classes':
         return !canAccessClasses();
