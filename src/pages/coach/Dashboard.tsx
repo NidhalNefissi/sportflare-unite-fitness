@@ -1,10 +1,13 @@
+
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { Users, Clock, Star, TrendingUp, Plus, QrCode, Calendar } from 'lucide-react';
+import { Users, Clock, Star, TrendingUp, Plus, QrCode, Calendar, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { mockClasses } from '@/data/mockClasses';
 
 const CoachDashboard = () => {
   const { user } = useAuth();
@@ -17,16 +20,18 @@ const CoachDashboard = () => {
     rating: 4.8
   };
 
-  const upcomingClasses = [
+  const [upcomingClasses, setUpcomingClasses] = useState([
     { 
       id: 1, 
       name: 'HIIT Cardio', 
       time: '6:00 PM', 
       date: 'Today',
       gym: 'FitZone Downtown', 
+      studio: 'Studio A',
       participants: 14, 
       capacity: 15,
-      qrGenerated: true 
+      qrGenerated: true,
+      type: 'single'
     },
     { 
       id: 2, 
@@ -34,16 +39,18 @@ const CoachDashboard = () => {
       time: '7:30 AM', 
       date: 'Tomorrow',
       gym: 'PowerGym', 
+      studio: 'Studio B',
       participants: 8, 
       capacity: 12,
-      qrGenerated: false 
+      qrGenerated: false,
+      type: 'program'
     },
-  ];
+  ]);
 
   const trainingPrograms = [
-    { name: 'Beginner Weight Loss', clients: 23, revenue: 1150, rating: 4.9 },
-    { name: 'Advanced Strength', clients: 15, revenue: 900, rating: 4.7 },
-    { name: 'Flexibility & Mobility', clients: 8, revenue: 320, rating: 4.8 },
+    { name: 'Beginner Weight Loss', clients: 23, revenue: 1150, rating: 4.9, type: 'program' },
+    { name: 'Advanced Strength', clients: 15, revenue: 900, rating: 4.7, type: 'program' },
+    { name: 'Flexibility & Mobility', clients: 8, revenue: 320, rating: 4.8, type: 'single' },
   ];
 
   const recentFeedback = [
@@ -53,8 +60,14 @@ const CoachDashboard = () => {
   ];
 
   const generateQRCode = (classId: number) => {
-    console.log(`Generating QR code for class ${classId}`);
-    // Mock QR code generation
+    setUpcomingClasses(prev => prev.map(c => 
+      c.id === classId ? { ...c, qrGenerated: true } : c
+    ));
+    console.log(`QR code generated for class ${classId}`);
+  };
+
+  const handleViewClassDetails = (classId: number) => {
+    navigate(`/coach/class/${classId}`);
   };
 
   return (
@@ -67,7 +80,7 @@ const CoachDashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Button 
             onClick={() => navigate('/coach/class-schedule')}
             className="h-16 bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-3"
@@ -83,10 +96,18 @@ const CoachDashboard = () => {
             <span className="text-lg">My Programs</span>
           </Button>
           <Button 
+            onClick={() => navigate('/coach/clients')}
             className="h-16 bg-indigo-600 hover:bg-indigo-700 flex items-center justify-center gap-3"
           >
             <Users className="w-6 h-6" />
             <span className="text-lg">My Clients</span>
+          </Button>
+          <Button 
+            onClick={() => navigate('/coach/profile')}
+            className="h-16 bg-teal-600 hover:bg-teal-700 flex items-center justify-center gap-3"
+          >
+            <Star className="w-6 h-6" />
+            <span className="text-lg">Profile</span>
           </Button>
         </div>
 
@@ -120,7 +141,7 @@ const CoachDashboard = () => {
               <TrendingUp className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${coachStats.monthlyEarnings.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{coachStats.monthlyEarnings.toLocaleString()} TND</div>
               <p className="text-xs text-muted-foreground">+12% from last month</p>
             </CardContent>
           </Card>
@@ -153,7 +174,11 @@ const CoachDashboard = () => {
                   </CardTitle>
                   <CardDescription>Your scheduled sessions</CardDescription>
                 </div>
-                <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                <Button 
+                  size="sm" 
+                  className="bg-purple-600 hover:bg-purple-700"
+                  onClick={() => navigate('/coach/create-class')}
+                >
                   <Plus className="w-4 h-4 mr-1" />
                   Create Class
                 </Button>
@@ -164,8 +189,14 @@ const CoachDashboard = () => {
                 <div key={classItem.id} className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h4 className="font-medium">{classItem.name}</h4>
-                      <p className="text-sm text-gray-600">{classItem.gym}</p>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium">{classItem.name}</h4>
+                        <Badge variant="outline">{classItem.type}</Badge>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MapPin className="w-3 h-3" />
+                        <span>{classItem.gym} • {classItem.studio}</span>
+                      </div>
                       <p className="text-sm text-gray-600">
                         {classItem.date} at {classItem.time}
                       </p>
@@ -193,7 +224,11 @@ const CoachDashboard = () => {
                         Generate QR
                       </Button>
                     )}
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleViewClassDetails(classItem.id)}
+                    >
                       View Details
                     </Button>
                   </div>
@@ -213,7 +248,11 @@ const CoachDashboard = () => {
                   </CardTitle>
                   <CardDescription>Your custom programs</CardDescription>
                 </div>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => navigate('/coach/programs')}
+                >
                   <Plus className="w-4 h-4 mr-1" />
                   New Program
                 </Button>
@@ -223,7 +262,10 @@ const CoachDashboard = () => {
               {trainingPrograms.map((program, index) => (
                 <div key={index} className="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border border-orange-200">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">{program.name}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium">{program.name}</h4>
+                      <Badge variant="outline">{program.type}</Badge>
+                    </div>
                     <div className="flex items-center gap-1">
                       <Star className="w-3 h-3 text-yellow-400 fill-current" />
                       <span className="text-sm font-medium">{program.rating}</span>
@@ -231,7 +273,7 @@ const CoachDashboard = () => {
                   </div>
                   <div className="flex items-center justify-between text-sm text-gray-600">
                     <span>{program.clients} clients</span>
-                    <span className="font-medium text-green-700">${program.revenue}</span>
+                    <span className="font-medium text-green-700">{program.revenue} TND</span>
                   </div>
                 </div>
               ))}

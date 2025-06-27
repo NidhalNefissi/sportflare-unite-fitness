@@ -4,8 +4,11 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
-import { Check, X, Clock, MapPin, Calendar, User } from 'lucide-react';
+import { Check, X, Clock, MapPin, Calendar, User, Plus, Edit, Upload } from 'lucide-react';
 
 interface StudioRequest {
   id: string;
@@ -27,6 +30,16 @@ interface StudioRequest {
   expectedAttendees: number;
   status: 'pending' | 'approved' | 'declined';
   requestedAt: string;
+}
+
+interface Studio {
+  id: string;
+  name: string;
+  capacity: number;
+  equipment: string[];
+  photos: string[];
+  hourlyRate?: number;
+  availability: 'available' | 'occupied' | 'maintenance';
 }
 
 const GymStudioManagement = () => {
@@ -75,11 +88,41 @@ const GymStudioManagement = () => {
     }
   ]);
 
-  const studios = [
-    { id: 'studio-a', name: 'Studio A', capacity: 25, equipment: ['Yoga mats', 'Mirrors', 'Sound system'] },
-    { id: 'studio-b', name: 'Studio B', capacity: 15, equipment: ['Free weights', 'Kettlebells', 'TRX'] },
-    { id: 'studio-c', name: 'Studio C', capacity: 30, equipment: ['Cardio machines', 'Sound system', 'Mirrors'] }
-  ];
+  const [studios, setStudios] = useState<Studio[]>([
+    { 
+      id: 'studio-a', 
+      name: 'Studio A', 
+      capacity: 25, 
+      equipment: ['Yoga mats', 'Mirrors', 'Sound system'],
+      photos: ['https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=400&h=300&fit=crop'],
+      availability: 'available'
+    },
+    { 
+      id: 'studio-b', 
+      name: 'Studio B', 
+      capacity: 15, 
+      equipment: ['Free weights', 'Kettlebells', 'TRX'],
+      photos: ['https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop'],
+      availability: 'available'
+    },
+    { 
+      id: 'studio-c', 
+      name: 'Studio C', 
+      capacity: 30, 
+      equipment: ['Cardio machines', 'Sound system', 'Mirrors'],
+      photos: ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop'],
+      availability: 'available'
+    }
+  ]);
+
+  const [isStudioDialogOpen, setIsStudioDialogOpen] = useState(false);
+  const [editingStudio, setEditingStudio] = useState<Studio | null>(null);
+  const [newStudio, setNewStudio] = useState({
+    name: '',
+    capacity: 0,
+    equipment: '',
+    photo: ''
+  });
 
   const handleApproveRequest = (requestId: string) => {
     setRequests(prev => prev.map(req => 
@@ -110,6 +153,46 @@ const GymStudioManagement = () => {
     });
   };
 
+  const handleAddStudio = () => {
+    if (!newStudio.name || !newStudio.capacity) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const studio: Studio = {
+      id: Date.now().toString(),
+      name: newStudio.name,
+      capacity: newStudio.capacity,
+      equipment: newStudio.equipment.split(',').map(e => e.trim()),
+      photos: newStudio.photo ? [newStudio.photo] : [],
+      availability: 'available'
+    };
+
+    setStudios(prev => [...prev, studio]);
+    setIsStudioDialogOpen(false);
+    setNewStudio({ name: '', capacity: 0, equipment: '', photo: '' });
+
+    toast({
+      title: "Studio Added",
+      description: `${newStudio.name} has been added to your gym.`
+    });
+  };
+
+  const handleEditStudio = (studio: Studio) => {
+    setEditingStudio(studio);
+    setNewStudio({
+      name: studio.name,
+      capacity: studio.capacity,
+      equipment: studio.equipment.join(', '),
+      photo: studio.photos[0] || ''
+    });
+    setIsStudioDialogOpen(true);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -126,9 +209,74 @@ const GymStudioManagement = () => {
     <DashboardLayout role="gym_owner">
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold">Studio Management</h1>
-          <p className="text-gray-600">Manage coach studio reservation requests and schedules</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Studio Management</h1>
+            <p className="text-gray-600">Manage coach studio reservation requests and schedules</p>
+          </div>
+          <Dialog open={isStudioDialogOpen} onOpenChange={setIsStudioDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Studio
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{editingStudio ? 'Edit Studio' : 'Add New Studio'}</DialogTitle>
+                <DialogDescription>
+                  {editingStudio ? 'Update studio details' : 'Add a new studio to your gym'}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Studio Name</Label>
+                  <Input
+                    id="name"
+                    value={newStudio.name}
+                    onChange={(e) => setNewStudio(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g., Studio A"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="capacity">Capacity</Label>
+                  <Input
+                    id="capacity"
+                    type="number"
+                    value={newStudio.capacity}
+                    onChange={(e) => setNewStudio(prev => ({ ...prev, capacity: parseInt(e.target.value) }))}
+                    placeholder="Maximum number of people"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="equipment">Equipment (comma-separated)</Label>
+                  <Input
+                    id="equipment"
+                    value={newStudio.equipment}
+                    onChange={(e) => setNewStudio(prev => ({ ...prev, equipment: e.target.value }))}
+                    placeholder="Yoga mats, Mirrors, Sound system"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="photo">Photo URL</Label>
+                  <Input
+                    id="photo"
+                    value={newStudio.photo}
+                    onChange={(e) => setNewStudio(prev => ({ ...prev, photo: e.target.value }))}
+                    placeholder="https://example.com/studio-photo.jpg"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsStudioDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddStudio} className="bg-blue-600 hover:bg-blue-700">
+                  {editingStudio ? 'Update Studio' : 'Add Studio'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Stats */}
@@ -257,23 +405,43 @@ const GymStudioManagement = () => {
             </CardContent>
           </Card>
 
-          {/* Studio Overview */}
+          {/* Studio Management */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-blue-600" />
-                Studio Overview
+                Your Studios
               </CardTitle>
-              <CardDescription>Available studios and their equipment</CardDescription>
+              <CardDescription>Manage your gym studios</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {studios.map((studio) => (
                 <div key={studio.id} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">{studio.name}</h4>
-                    <Badge variant="outline">
-                      Capacity: {studio.capacity}
-                    </Badge>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      {studio.photos[0] && (
+                        <img 
+                          src={studio.photos[0]} 
+                          alt={studio.name}
+                          className="w-12 h-12 rounded object-cover"
+                        />
+                      )}
+                      <div>
+                        <h4 className="font-medium">{studio.name}</h4>
+                        <Badge variant="outline">
+                          Capacity: {studio.capacity}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleEditStudio(studio)}
+                      >
+                        <Edit className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-gray-600">Equipment:</p>
@@ -291,7 +459,7 @@ const GymStudioManagement = () => {
           </Card>
         </div>
 
-        {/* Approved Requests */}
+        {/* Recent Approvals */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
