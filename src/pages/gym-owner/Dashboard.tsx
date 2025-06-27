@@ -4,41 +4,98 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { Users, MapPin, Clock, Star, Plus, TrendingUp, Calendar, Settings } from 'lucide-react';
+import { Users, MapPin, Clock, Star, Plus, TrendingUp, Calendar, Settings, CheckCircle, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { mockClasses } from '@/data/mockClasses';
+import { toast } from '@/hooks/use-toast';
+
+interface StudioRequest {
+  id: string;
+  coach: string;
+  coachId: string;
+  studio: string;
+  date: string;
+  time: string;
+  type: string;
+  duration: string;
+  status: 'pending' | 'approved' | 'declined';
+  requestDate: string;
+}
 
 const GymOwnerDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [pendingRequests, setPendingRequests] = useState([
-    { id: '1', coach: 'Alex Thompson', studio: 'Studio A', date: 'Tomorrow', time: '10:00 AM', type: 'Personal Training' },
-    { id: '2', coach: 'Lisa Chen', studio: 'Studio B', date: 'Dec 28', time: '2:00 PM', type: 'Pilates Class' },
+  
+  const [studioRequests, setStudioRequests] = useState<StudioRequest[]>([
+    { 
+      id: '1', 
+      coach: 'Alex Thompson', 
+      coachId: 'coach-1',
+      studio: 'Studio A', 
+      date: 'Tomorrow', 
+      time: '10:00 AM', 
+      type: 'Personal Training',
+      duration: '1 hour',
+      status: 'pending',
+      requestDate: '2 hours ago'
+    },
+    { 
+      id: '2', 
+      coach: 'Lisa Chen', 
+      coachId: 'coach-2',
+      studio: 'Studio B', 
+      date: 'Dec 28', 
+      time: '2:00 PM', 
+      type: 'Pilates Class',
+      duration: '45 minutes',
+      status: 'pending',
+      requestDate: '5 hours ago'
+    },
   ]);
 
   const gymStats = {
     totalMembers: 347,
     activeToday: 89,
     monthlyRevenue: 15420,
-    classesRunning: 12
+    classesRunning: 12,
+    pendingRequests: studioRequests.filter(r => r.status === 'pending').length,
+    occupancyRate: 78
   };
 
-  const todaysClasses = mockClasses.filter(c => c.date === new Date().toISOString().split('T')[0]);
+  const todaysClasses = [
+    { id: '1', name: 'Morning Yoga', coach: 'Sarah Wilson', time: '8:00 AM', studio: 'Studio A', attendees: 12, capacity: 15 },
+    { id: '2', name: 'HIIT Training', coach: 'Mike Jones', time: '6:00 PM', studio: 'Studio B', attendees: 8, capacity: 10 },
+  ];
 
-  const recentBookings = [
-    { member: 'John Smith', class: 'HIIT Training', time: '2 hours ago', status: 'confirmed' },
-    { member: 'Sarah Wilson', class: 'Yoga Flow', time: '4 hours ago', status: 'confirmed' },
-    { member: 'Mike Jones', class: 'Spin Class', time: '6 hours ago', status: 'waitlist' },
+  const recentActivity = [
+    { type: 'booking', message: 'New member John Smith joined', time: '2 hours ago' },
+    { type: 'payment', message: 'Monthly subscription payment received', time: '4 hours ago' },
+    { type: 'request', message: 'Studio reservation request from Alex Thompson', time: '6 hours ago' },
   ];
 
   const handleApproveRequest = (requestId: string) => {
-    setPendingRequests(prev => prev.filter(req => req.id !== requestId));
-    // In real app, this would sync with backend and notify users
+    setStudioRequests(prev => 
+      prev.map(req => 
+        req.id === requestId ? { ...req, status: 'approved' as const } : req
+      )
+    );
+    toast({
+      title: "Request Approved",
+      description: "Studio reservation has been approved.",
+    });
   };
 
   const handleDeclineRequest = (requestId: string) => {
-    setPendingRequests(prev => prev.filter(req => req.id !== requestId));
+    setStudioRequests(prev => 
+      prev.map(req => 
+        req.id === requestId ? { ...req, status: 'declined' as const } : req
+      )
+    );
+    toast({
+      title: "Request Declined",
+      description: "Studio reservation has been declined.",
+      variant: "destructive",
+    });
   };
 
   return (
@@ -48,41 +105,56 @@ const GymOwnerDashboard = () => {
         <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl p-6 text-white">
           <h1 className="text-2xl font-bold mb-2">Welcome back, {user?.name}!</h1>
           <p className="text-green-100">FitZone Downtown • Manage your gym operations</p>
+          <div className="flex items-center gap-4 mt-2">
+            <div className="flex items-center gap-1">
+              <Users className="w-4 h-4" />
+              <span className="text-sm">{gymStats.totalMembers} members</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <TrendingUp className="w-4 h-4" />
+              <span className="text-sm">{gymStats.occupancyRate}% occupancy</span>
+            </div>
+          </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Button 
             onClick={() => navigate('/gym-owner/studio-management')}
-            className="h-16 bg-green-600 hover:bg-green-700 flex items-center justify-center gap-3"
+            className="h-16 bg-green-600 hover:bg-green-700 flex flex-col items-center justify-center gap-1"
           >
-            <MapPin className="w-6 h-6" />
-            <span className="text-lg">Studio Requests</span>
+            <MapPin className="w-5 h-5" />
+            <span className="text-sm">Studio Requests</span>
+            {gymStats.pendingRequests > 0 && (
+              <Badge variant="destructive" className="text-xs">
+                {gymStats.pendingRequests}
+              </Badge>
+            )}
           </Button>
           <Button 
-            onClick={() => navigate('/gym-owner/class-schedule')}
-            className="h-16 bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-3"
+            onClick={() => navigate('/gym-owner/classes')}
+            className="h-16 bg-blue-600 hover:bg-blue-700 flex flex-col items-center justify-center gap-1"
           >
-            <Calendar className="w-6 h-6" />
-            <span className="text-lg">Class Schedule</span>
+            <Calendar className="w-5 h-5" />
+            <span className="text-sm">Classes</span>
           </Button>
           <Button 
             onClick={() => navigate('/gym-owner/analytics')}
-            className="h-16 bg-teal-600 hover:bg-teal-700 flex items-center justify-center gap-3"
+            className="h-16 bg-teal-600 hover:bg-teal-700 flex flex-col items-center justify-center gap-1"
           >
-            <TrendingUp className="w-6 h-6" />
-            <span className="text-lg">Analytics</span>
+            <TrendingUp className="w-5 h-5" />
+            <span className="text-sm">Analytics</span>
           </Button>
           <Button 
             onClick={() => navigate('/gym-owner/settings')}
-            className="h-16 bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-3"
+            className="h-16 bg-purple-600 hover:bg-purple-700 flex flex-col items-center justify-center gap-1"
           >
-            <Settings className="w-6 h-6" />
-            <span className="text-lg">Gym Settings</span>
+            <Settings className="w-5 h-5" />
+            <span className="text-sm">Settings</span>
           </Button>
         </div>
 
-        {/* Quick Stats */}
+        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -130,137 +202,134 @@ const GymOwnerDashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Today's Classes */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5" />
-                    Today's Classes
-                  </CardTitle>
-                  <CardDescription>Active classes and occupancy</CardDescription>
-                </div>
-                <Button 
-                  size="sm" 
-                  className="bg-green-600 hover:bg-green-700"
-                  onClick={() => navigate('/gym-owner/add-class')}
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add Class
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {todaysClasses.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No classes scheduled for today</p>
-              ) : (
-                todaysClasses.map((classItem) => (
-                  <div key={classItem.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium">{classItem.name}</h4>
-                        {classItem.booked === classItem.capacity && (
-                          <Badge variant="destructive">Full</Badge>
-                        )}
-                        <Badge variant="outline">{classItem.type}</Badge>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Clock className="w-3 h-3" />
-                        <span>{classItem.startTime}</span>
-                        <span>•</span>
-                        <span>{classItem.coach.name}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-semibold">
-                        {classItem.booked}/{classItem.capacity}
-                      </div>
-                      <div className="text-xs text-gray-500">capacity</div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
           {/* Pending Studio Requests */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-orange-600" />
                 Pending Requests
+                {gymStats.pendingRequests > 0 && (
+                  <Badge variant="destructive">{gymStats.pendingRequests}</Badge>
+                )}
               </CardTitle>
               <CardDescription>Coach studio reservation requests</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {pendingRequests.length === 0 ? (
+              {studioRequests.filter(r => r.status === 'pending').length === 0 ? (
                 <p className="text-gray-500 text-center py-4">No pending requests</p>
               ) : (
-                pendingRequests.map((request) => (
-                  <div key={request.id} className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">{request.coach}</h4>
-                      <Badge variant="outline" className="border-orange-300 text-orange-700">
-                        Pending
-                      </Badge>
-                    </div>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-3 h-3" />
-                        <span>{request.studio} • {request.type}</span>
+                studioRequests
+                  .filter(r => r.status === 'pending')
+                  .map((request) => (
+                    <div key={request.id} className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">{request.coach}</h4>
+                        <Badge variant="outline" className="border-orange-300 text-orange-700">
+                          Pending
+                        </Badge>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-3 h-3" />
-                        <span>{request.date} at {request.time}</span>
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-3 h-3" />
+                          <span>{request.studio} • {request.type}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-3 h-3" />
+                          <span>{request.date} at {request.time}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-3 h-3" />
+                          <span>Duration: {request.duration}</span>
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          Requested {request.requestDate}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <Button 
+                          size="sm" 
+                          className="bg-green-600 hover:bg-green-700 flex items-center gap-1"
+                          onClick={() => handleApproveRequest(request.id)}
+                        >
+                          <CheckCircle className="w-3 h-3" />
+                          Approve
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="flex items-center gap-1"
+                          onClick={() => handleDeclineRequest(request.id)}
+                        >
+                          <X className="w-3 h-3" />
+                          Decline
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex gap-2 mt-3">
-                      <Button 
-                        size="sm" 
-                        className="bg-green-600 hover:bg-green-700"
-                        onClick={() => handleApproveRequest(request.id)}
-                      >
-                        Approve
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleDeclineRequest(request.id)}
-                      >
-                        Decline
-                      </Button>
+                  ))
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Today's Classes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Today's Classes
+              </CardTitle>
+              <CardDescription>Active classes and occupancy</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {todaysClasses.map((classItem) => (
+                <div key={classItem.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium">{classItem.name}</h4>
+                      {classItem.attendees === classItem.capacity && (
+                        <Badge variant="destructive">Full</Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Clock className="w-3 h-3" />
+                      <span>{classItem.time}</span>
+                      <span>•</span>
+                      <span>{classItem.coach}</span>
+                      <span>•</span>
+                      <span>{classItem.studio}</span>
                     </div>
                   </div>
-                ))
-              )}
+                  <div className="text-right">
+                    <div className="text-lg font-semibold">
+                      {classItem.attendees}/{classItem.capacity}
+                    </div>
+                    <div className="text-xs text-gray-500">capacity</div>
+                  </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </div>
 
-        {/* Recent Bookings */}
+        {/* Recent Activity */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Bookings</CardTitle>
-            <CardDescription>Latest member activity</CardDescription>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Latest gym operations and updates</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recentBookings.map((booking, index) => (
+              {recentActivity.map((activity, index) => (
                 <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className={`w-2 h-2 rounded-full ${
+                      activity.type === 'booking' ? 'bg-green-500' : 
+                      activity.type === 'payment' ? 'bg-blue-500' : 'bg-orange-500'
+                    }`}></div>
                     <div>
-                      <p className="font-medium">{booking.member}</p>
-                      <p className="text-sm text-gray-600">{booking.class} • {booking.time}</p>
+                      <p className="text-sm font-medium">{activity.message}</p>
+                      <p className="text-xs text-gray-500">{activity.time}</p>
                     </div>
                   </div>
-                  <Badge 
-                    variant={booking.status === 'confirmed' ? 'default' : 'secondary'}
-                    className={booking.status === 'confirmed' ? 'bg-green-100 text-green-800' : ''}
-                  >
-                    {booking.status}
-                  </Badge>
                 </div>
               ))}
             </div>
