@@ -1,224 +1,524 @@
 
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/contexts/AuthContext';
-import { Users, Activity, TrendingUp, AlertTriangle, Shield, Settings } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/hooks/use-toast';
+import { 
+  Users, 
+  Building2, 
+  Package, 
+  CreditCard, 
+  TrendingUp, 
+  AlertTriangle,
+  UserCheck,
+  UserX,
+  MessageSquare,
+  Settings,
+  FileText,
+  Shield,
+  Activity
+} from 'lucide-react';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'client' | 'coach' | 'gym_owner' | 'brand';
+  status: 'active' | 'suspended' | 'pending';
+  joinDate: string;
+  lastActive: string;
+}
+
+interface Transaction {
+  id: string;
+  userId: string;
+  userName: string;
+  type: 'subscription' | 'product' | 'class';
+  amount: number;
+  status: 'completed' | 'pending' | 'failed';
+  date: string;
+}
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const [users, setUsers] = useState<User[]>([
+    {
+      id: 'client-1',
+      name: 'Sarah Ben Mohamed',
+      email: 'client1@test.com', 
+      role: 'client',
+      status: 'active',
+      joinDate: '2024-01-15',
+      lastActive: '2024-06-26'
+    },
+    {
+      id: 'coach-1',
+      name: 'Emma Kallel',
+      email: 'coach1@test.com',
+      role: 'coach', 
+      status: 'active',
+      joinDate: '2024-02-10',
+      lastActive: '2024-06-25'
+    },
+    {
+      id: 'gym-1',
+      name: 'Ahmed Fitness Center',
+      email: 'gym1@test.com',
+      role: 'gym_owner',
+      status: 'pending',
+      joinDate: '2024-06-20',
+      lastActive: '2024-06-24'
+    },
+    {
+      id: 'brand-1',
+      name: 'FitNutrition Tunisia',
+      email: 'brand1@test.com',
+      role: 'brand',
+      status: 'active',
+      joinDate: '2024-03-05',
+      lastActive: '2024-06-26'
+    }
+  ]);
 
-  const platformStats = {
-    totalUsers: 1247,
-    activeUsers: 892,
-    monthlyRevenue: 45780,
-    reportedIssues: 7
+  const [transactions] = useState<Transaction[]>([
+    {
+      id: 'txn-1',
+      userId: 'client-1',
+      userName: 'Sarah Ben Mohamed',
+      type: 'subscription',
+      amount: 90,
+      status: 'completed',
+      date: '2024-06-25'
+    },
+    {
+      id: 'txn-2', 
+      userId: 'client-1',
+      userName: 'Sarah Ben Mohamed',
+      type: 'product',
+      amount: 89.99,
+      status: 'completed',
+      date: '2024-06-24'
+    },
+    {
+      id: 'txn-3',
+      userId: 'client-2',
+      userName: 'Mohamed Ali',
+      type: 'subscription',
+      amount: 120,
+      status: 'pending',
+      date: '2024-06-26'
+    }
+  ]);
+
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [isNotificationDialogOpen, setIsNotificationDialogOpen] = useState(false);
+
+  const handleUserStatusChange = (userId: string, newStatus: 'active' | 'suspended') => {
+    setUsers(prev => prev.map(user => 
+      user.id === userId ? { ...user, status: newStatus } : user
+    ));
+    
+    toast({
+      title: "User Status Updated",
+      description: `User has been ${newStatus === 'suspended' ? 'suspended' : 'activated'}.`
+    });
   };
 
-  const recentActivity = [
-    { type: 'user_registration', user: 'Sarah Wilson', time: '2 minutes ago', status: 'success' },
-    { type: 'booking_created', user: 'Mike Johnson', time: '5 minutes ago', status: 'success' },
-    { type: 'payment_failed', user: 'Emma Davis', time: '12 minutes ago', status: 'error' },
-    { type: 'report_submitted', user: 'Alex Thompson', time: '18 minutes ago', status: 'warning' }
-  ];
+  const handleApproveUser = (userId: string) => {
+    setUsers(prev => prev.map(user => 
+      user.id === userId ? { ...user, status: 'active' } : user
+    ));
+    
+    toast({
+      title: "User Approved",
+      description: "User account has been approved and activated."
+    });
+  };
 
-  const userGrowth = [
-    { role: 'Clients', count: 847, growth: '+12%' },
-    { role: 'Coaches', count: 156, growth: '+8%' },
-    { role: 'Gym Owners', count: 89, growth: '+15%' },
-    { role: 'Brands', count: 43, growth: '+23%' }
-  ];
+  const sendGlobalNotification = () => {
+    if (!notificationMessage.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a notification message.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Mock send notification
+    toast({
+      title: "Notification Sent",
+      description: `Global notification sent to all ${users.length} users.`
+    });
+    
+    setNotificationMessage('');
+    setIsNotificationDialogOpen(false);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'success': return 'bg-green-100 text-green-800';
-      case 'error': return 'bg-red-100 text-red-800';
-      case 'warning': return 'bg-yellow-100 text-yellow-800';
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'suspended': return 'bg-red-100 text-red-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'client': return 'bg-blue-100 text-blue-800';
+      case 'coach': return 'bg-purple-100 text-purple-800';
+      case 'gym_owner': return 'bg-orange-100 text-orange-800';
+      case 'brand': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const stats = {
+    totalUsers: users.length,
+    activeUsers: users.filter(u => u.status === 'active').length,
+    pendingUsers: users.filter(u => u.status === 'pending').length,
+    totalRevenue: transactions.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.amount, 0),
+    pendingTransactions: transactions.filter(t => t.status === 'pending').length,
+    completedTransactions: transactions.filter(t => t.status === 'completed').length
   };
 
   return (
     <DashboardLayout role="admin">
       <div className="space-y-6">
-        {/* Welcome Header */}
-        <div className="bg-gradient-to-r from-gray-900 to-gray-700 rounded-xl p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">Welcome back, {user?.name}!</h1>
-          <p className="text-gray-300">Monitor and manage the SportFlare platform</p>
+        {/* Header */}
+        <div className="bg-gradient-to-r from-slate-900 to-slate-700 rounded-xl p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold mb-2">Admin Dashboard</h1>
+              <p className="text-slate-300">Manage users, content, and system analytics</p>
+            </div>
+            <Dialog open={isNotificationDialogOpen} onOpenChange={setIsNotificationDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="secondary">
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Send Global Notification
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Send Global Notification</DialogTitle>
+                  <DialogDescription>
+                    Send a notification to all users on the platform.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <textarea
+                    className="w-full p-3 border rounded-lg resize-none"
+                    rows={4}
+                    placeholder="Enter your notification message..."
+                    value={notificationMessage}
+                    onChange={(e) => setNotificationMessage(e.target.value)}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsNotificationDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={sendGlobalNotification}>
+                    Send Notification
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Button 
-            onClick={() => navigate('/admin/users')}
-            className="h-16 bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-3"
-          >
-            <Users className="w-6 h-6" />
-            <span className="text-lg">Manage Users</span>
-          </Button>
-          <Button 
-            onClick={() => navigate('/admin/reports')}
-            className="h-16 bg-red-600 hover:bg-red-700 flex items-center justify-center gap-3"
-          >
-            <AlertTriangle className="w-6 h-6" />
-            <span className="text-lg">Reports</span>
-          </Button>
-          <Button 
-            onClick={() => navigate('/admin/analytics')}
-            className="h-16 bg-green-600 hover:bg-green-700 flex items-center justify-center gap-3"
-          >
-            <TrendingUp className="w-6 h-6" />
-            <span className="text-lg">Analytics</span>
-          </Button>
-          <Button 
-            onClick={() => navigate('/admin/settings')}
-            className="h-16 bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-3"
-          >
-            <Settings className="w-6 h-6" />
-            <span className="text-lg">Settings</span>
-          </Button>
-        </div>
-
-        {/* Platform Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
               <Users className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{platformStats.totalUsers.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">+18% from last month</p>
+              <div className="text-2xl font-bold">{stats.totalUsers}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.activeUsers} active, {stats.pendingUsers} pending
+              </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+              <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+              <CreditCard className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalRevenue.toFixed(2)} TND</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.completedTransactions} completed transactions
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.pendingUsers}</div>
+              <p className="text-xs text-muted-foreground">
+                User accounts awaiting approval
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">System Health</CardTitle>
               <Activity className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{platformStats.activeUsers.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-              <TrendingUp className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{platformStats.monthlyRevenue.toLocaleString()} TND</div>
-              <p className="text-xs text-muted-foreground">+25% from last month</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Reported Issues</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{platformStats.reportedIssues}</div>
-              <p className="text-xs text-muted-foreground">-3 from yesterday</p>
+              <div className="text-2xl font-bold text-green-600">99.2%</div>
+              <p className="text-xs text-muted-foreground">
+                Platform uptime
+              </p>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* User Growth */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                User Growth by Role
-              </CardTitle>
-              <CardDescription>Monthly user registration statistics</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {userGrowth.map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium">{item.role}</p>
-                    <p className="text-sm text-gray-600">{item.count} total users</p>
-                  </div>
-                  <Badge variant="outline" className="bg-green-100 text-green-800">
-                    {item.growth}
-                  </Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+        {/* Main Content */}
+        <Tabs defaultValue="users" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="users">User Management</TabsTrigger>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="content">Content Approval</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
 
-          {/* Recent Activity */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="w-5 h-5" />
-                Recent Platform Activity
-              </CardTitle>
-              <CardDescription>Latest system events and user actions</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between py-2">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <div>
-                      <p className="font-medium text-sm">{activity.type.replace('_', ' ')}</p>
-                      <p className="text-xs text-gray-600">{activity.user} • {activity.time}</p>
+          <TabsContent value="users" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Management</CardTitle>
+                <CardDescription>Manage user accounts and permissions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {users.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div>
+                          <h4 className="font-medium">{user.name}</h4>
+                          <p className="text-sm text-gray-600">{user.email}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge className={getRoleColor(user.role)}>
+                              {user.role.replace('_', ' ')}
+                            </Badge>
+                            <Badge className={getStatusColor(user.status)}>
+                              {user.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {user.status === 'pending' && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleApproveUser(user.id)}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <UserCheck className="w-4 h-4 mr-1" />
+                            Approve
+                          </Button>
+                        )}
+                        {user.status === 'active' && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleUserStatusChange(user.id, 'suspended')}
+                          >
+                            <UserX className="w-4 h-4 mr-1" />
+                            Suspend
+                          </Button>
+                        )}
+                        {user.status === 'suspended' && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleUserStatusChange(user.id, 'active')}
+                          >
+                            <UserCheck className="w-4 h-4 mr-1" />
+                            Reactivate
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setIsUserDialogOpen(true);
+                          }}
+                        >
+                          View Details
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="transactions" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Transaction History</CardTitle>
+                <CardDescription>Monitor all platform transactions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {transactions.map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <h4 className="font-medium">{transaction.userName}</h4>
+                        <p className="text-sm text-gray-600">
+                          {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)} - {transaction.date}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold">{transaction.amount} TND</p>
+                        <Badge className={transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                          {transaction.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="content" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Content Moderation</CardTitle>
+                <CardDescription>Review and approve user-generated content</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No Pending Content</h3>
+                  <p className="text-gray-600">All content has been reviewed and approved.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Platform Analytics</CardTitle>
+                <CardDescription>System performance and usage metrics</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-medium">User Growth</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span>Clients</span>
+                        <span>{users.filter(u => u.role === 'client').length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Coaches</span>
+                        <span>{users.filter(u => u.role === 'coach').length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Gym Owners</span>
+                        <span>{users.filter(u => u.role === 'gym_owner').length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Brands</span>
+                        <span>{users.filter(u => u.role === 'brand').length}</span>
+                      </div>
                     </div>
                   </div>
-                  <Badge className={getStatusColor(activity.status)}>
-                    {activity.status}
-                  </Badge>
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Revenue Breakdown</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span>Subscriptions</span>
+                        <span>{transactions.filter(t => t.type === 'subscription' && t.status === 'completed').reduce((sum, t) => sum + t.amount, 0)} TND</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Products</span>
+                        <span>{transactions.filter(t => t.type === 'product' && t.status === 'completed').reduce((sum, t) => sum + t.amount, 0)} TND</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Classes</span>
+                        <span>{transactions.filter(t => t.type === 'class' && t.status === 'completed').reduce((sum, t) => sum + t.amount, 0)} TND</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-        {/* System Health */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              System Health & Security
-            </CardTitle>
-            <CardDescription>Platform performance and security status</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="font-medium text-green-900">Server Status</span>
+        {/* User Details Dialog */}
+        <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>User Details</DialogTitle>
+              <DialogDescription>
+                View and manage user account information
+              </DialogDescription>
+            </DialogHeader>
+            {selectedUser && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Name:</span>
+                    <p>{selectedUser.name}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Email:</span>
+                    <p>{selectedUser.email}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Role:</span>
+                    <Badge className={getRoleColor(selectedUser.role)}>
+                      {selectedUser.role.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="font-medium">Status:</span>
+                    <Badge className={getStatusColor(selectedUser.status)}>
+                      {selectedUser.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="font-medium">Join Date:</span>
+                    <p>{selectedUser.joinDate}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Last Active:</span>
+                    <p>{selectedUser.lastActive}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-green-700">All systems operational</p>
               </div>
-              
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="font-medium text-blue-900">Database</span>
-                </div>
-                <p className="text-sm text-blue-700">98.9% uptime this month</p>
-              </div>
-              
-              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <span className="font-medium text-yellow-900">Security</span>
-                </div>
-                <p className="text-sm text-yellow-700">2 failed login attempts today</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsUserDialogOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

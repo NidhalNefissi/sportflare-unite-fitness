@@ -1,120 +1,156 @@
 
-export interface MockUser {
-  id: string;
-  email: string;
-  password: string;
-  name: string;
-  role: 'client' | 'coach' | 'gym_owner' | 'brand' | 'admin';
-  avatar?: string;
-  phone?: string;
-  coaching_field?: string;
-  gym_name?: string;
-  location?: string;
-  company_name?: string;
-}
+import { User } from '@/types/user';
 
-export const mockUsers: MockUser[] = [
+export const mockUsers: User[] = [
   // Clients
   {
     id: 'client-1',
     email: 'client1@test.com',
-    password: 'password123',
     name: 'Sarah Ben Mohamed',
     role: 'client',
+    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
     phone: '+216 20 123 456',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face'
+    bio: 'Fitness enthusiast looking to stay healthy and strong',
+    location: 'Tunis, Tunisia',
+    joinDate: '2024-01-15',
+    isVerified: true,
+    subscription: {
+      plan: 'premium',
+      expiresAt: '2024-12-31'
+    }
   },
   {
     id: 'client-2',
     email: 'client2@test.com',
-    password: 'password123',
-    name: 'Mohamed Ali Cherif',
+    name: 'Mohamed Ali Trabelsi',
     role: 'client',
-    phone: '+216 25 789 012',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+    phone: '+216 21 234 567',
+    bio: 'Marathon runner and yoga practitioner',
+    location: 'Sfax, Tunisia',
+    joinDate: '2024-02-20',
+    isVerified: true,
+    subscription: {
+      plan: 'plus',
+      expiresAt: '2024-11-30'
+    }
   },
+
   // Coaches
   {
     id: 'coach-1',
     email: 'coach1@test.com',
-    password: 'password123',
     name: 'Emma Kallel',
     role: 'coach',
+    avatar: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=100&h=100&fit=crop&crop=face',
     phone: '+216 22 345 678',
-    coaching_field: 'Musculation',
-    avatar: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=100&h=100&fit=crop&crop=face'
+    bio: 'Certified personal trainer specializing in strength training and nutrition',
+    location: 'Tunis, Tunisia',
+    joinDate: '2024-01-10',
+    isVerified: true
   },
   {
     id: 'coach-2',
     email: 'coach2@test.com',
-    password: 'password123',
-    name: 'Alex Trabelsi',
+    name: 'Youssef Ben Salah',
     role: 'coach',
-    phone: '+216 26 901 234',
-    coaching_field: 'Yoga',
-    avatar: 'https://images.unsplash.com/photo-1566753323558-f4e0952af115?w=100&h=100&fit=crop&crop=face'
+    avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=100&h=100&fit=crop&crop=face',
+    phone: '+216 23 456 789',
+    bio: 'Yoga instructor and mindfulness coach with 8 years experience',
+    location: 'Sousse, Tunisia',
+    joinDate: '2024-01-25',
+    isVerified: true
   },
+
   // Gym Owners
   {
-    id: 'gym-1',
+    id: 'gym-owner-1',
     email: 'gym1@test.com',
-    password: 'password123',
-    name: 'Karim Mansouri',
+    name: 'Ahmed Fitness Center',
     role: 'gym_owner',
-    phone: '+216 71 234 567',
-    gym_name: 'FitZone Tunis',
-    location: 'Centre-ville, Tunis',
-    avatar: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=100&h=100&fit=crop&crop=face'
+    avatar: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=100&h=100&fit=crop&crop=face',
+    phone: '+216 24 567 890',
+    bio: 'Premium fitness facility with state-of-the-art equipment',
+    location: 'Tunis, Tunisia',
+    joinDate: '2024-01-05',
+    isVerified: true
   },
   {
-    id: 'gym-2',
+    id: 'gym-owner-2',
     email: 'gym2@test.com',
-    password: 'password123',
-    name: 'Leila Bouazizi',
+    name: 'Zen Wellness Studio',
     role: 'gym_owner',
-    phone: '+216 70 345 678',
-    gym_name: 'PowerGym Elite',
-    location: 'Menzah, Tunis',
-    avatar: 'https://images.unsplash.com/photo-1558618047-dd5175a2c79d?w=100&h=100&fit=crop&crop=face'
+    avatar: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=100&h=100&fit=crop&crop=face',
+    phone: '+216 25 678 901',
+    bio: 'Holistic wellness center focusing on mind-body connection',
+    location: 'Hammamet, Tunisia',
+    joinDate: '2024-02-01',
+    isVerified: true
   },
+
   // Brands
   {
     id: 'brand-1',
     email: 'brand1@test.com',
-    password: 'password123',
-    name: 'Ahmed Gharbi',
+    name: 'FitNutrition Tunisia',
     role: 'brand',
-    phone: '+216 28 456 789',
-    company_name: 'FitNutrition Tunisia',
-    avatar: 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=100&h=100&fit=crop&crop=face'
+    avatar: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=100&h=100&fit=crop&crop=face',
+    phone: '+216 26 789 012',
+    bio: 'Premium sports nutrition and supplements for athletes',
+    location: 'Tunis, Tunisia',
+    joinDate: '2024-01-20',
+    isVerified: true
   },
   {
     id: 'brand-2',
     email: 'brand2@test.com',
-    password: 'password123',
-    name: 'Nour Khelifi',
+    name: 'ActiveGear Tunisia',
     role: 'brand',
-    phone: '+216 29 567 890',
-    company_name: 'SportStyle Tunisia',
-    avatar: 'https://images.unsplash.com/photo-1506629905607-83d682b2b05d?w=100&h=100&fit=crop&crop=face'
+    avatar: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=100&h=100&fit=crop&crop=face',
+    phone: '+216 27 890 123',
+    bio: 'High-quality fitness equipment and athletic wear',
+    location: 'Sousse, Tunisia',
+    joinDate: '2024-02-15',
+    isVerified: true
   },
+
   // Admins
   {
     id: 'admin-1',
-    email: 'admin1@test.com',
-    password: 'password123',
-    name: 'Administrateur SportFlare',
+    email: 'admin@sportflare.tn',
+    name: 'SportFlare Admin',
     role: 'admin',
-    phone: '+216 70 000 000',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+    phone: '+216 71 123 456',
+    bio: 'Platform administrator and system manager',
+    location: 'Tunis, Tunisia',
+    joinDate: '2023-12-01',
+    isVerified: true
   },
   {
     id: 'admin-2',
-    email: 'admin2@test.com',
-    password: 'password123',
-    name: 'Support Technique',
+    email: 'admin2@sportflare.tn',
+    name: 'Leila Mansouri',
     role: 'admin',
-    phone: '+216 70 000 001',
-    avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face'
+    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
+    phone: '+216 71 123 457',
+    bio: 'Content moderator and user support specialist',
+    location: 'Tunis, Tunisia',
+    joinDate: '2023-12-15',
+    isVerified: true
   }
 ];
+
+// Helper function to get user by credentials
+export const getUserByCredentials = (email: string, password: string) => {
+  // Mock authentication - in real app, this would be handled by backend
+  if (password === 'password123') {
+    return mockUsers.find(user => user.email === email) || null;
+  }
+  return null;
+};
+
+// Helper function to check if email exists
+export const emailExists = (email: string) => {
+  return mockUsers.some(user => user.email === email);
+};

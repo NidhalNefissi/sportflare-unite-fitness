@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,79 +6,31 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { useSubscriptionAccess, SubscriptionPlan } from '@/hooks/useSubscriptionAccess';
+import { useSubscriptionAccess } from '@/hooks/useSubscriptionAccess';
+import { SubscriptionTier, SubscriptionPlan, SUBSCRIPTION_PLANS } from '@/types/subscription';
 import { Check, CreditCard, MapPin } from 'lucide-react';
-
-interface Plan {
-  id: SubscriptionPlan;
-  name: string;
-  price: number;
-  features: string[];
-  popular?: boolean;
-}
 
 const ClientSubscriptions = () => {
   const { currentPlan } = useSubscriptionAccess();
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>('basic');
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionTier>('basic');
   const [selectedDuration, setSelectedDuration] = useState<1 | 3 | 6 | 12>(1);
   const [paymentMethod, setPaymentMethod] = useState<'online' | 'gym'>('online');
   const [showPayment, setShowPayment] = useState(false);
 
-  const basePrices = {
-    basic: 60,
-    plus: 90,
-    premium: 120
-  };
-
-  const getPrice = (plan: SubscriptionPlan, duration: number) => {
-    if (!plan) return 0;
-    const basePrice = basePrices[plan];
+  const getPrice = (plan: SubscriptionTier, duration: number) => {
+    const planDetails = SUBSCRIPTION_PLANS.find(p => p.tier === plan);
+    if (!planDetails) return 0;
+    const basePrice = planDetails.price;
     const discount = duration > 1 ? 5 : 0; // 5 TND discount for multi-month
     return (basePrice - discount) * duration;
   };
 
-  const getPricePerMonth = (plan: SubscriptionPlan, duration: number) => {
-    if (!plan) return 0;
-    const basePrice = basePrices[plan];
+  const getPricePerMonth = (plan: SubscriptionTier, duration: number) => {
+    const planDetails = SUBSCRIPTION_PLANS.find(p => p.tier === plan);
+    if (!planDetails) return 0;
+    const basePrice = planDetails.price;
     return duration > 1 ? basePrice - 5 : basePrice;
   };
-
-  const plans: Plan[] = [
-    {
-      id: 'basic',
-      name: 'Basic',
-      price: basePrices.basic,
-      features: [
-        'Access to basic workout routines',
-        'Limited access to community features',
-        'Standard customer support'
-      ]
-    },
-    {
-      id: 'plus',
-      name: 'Plus',
-      price: basePrices.plus,
-      popular: true,
-      features: [
-        'Everything in Basic, plus:',
-        'Access to all group fitness classes',
-        'Unlimited access to gym facilities',
-        'Priority customer support'
-      ]
-    },
-    {
-      id: 'premium',
-      name: 'Premium',
-      price: basePrices.premium,
-      features: [
-        'Everything in Plus, plus:',
-        'Personalized workout plans',
-        'One-on-one coaching sessions',
-        'Exclusive events and workshops',
-        '24/7 premium support'
-      ]
-    }
-  ];
 
   const handleSubscribe = () => {
     // Mock subscribe functionality
@@ -125,27 +78,27 @@ const ClientSubscriptions = () => {
 
         {/* Plans */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {plans.map((plan) => (
+          {SUBSCRIPTION_PLANS.map((plan) => (
             <Card 
               key={plan.id} 
-              className={`cursor-pointer transition-all ${selectedPlan === plan.id ? 'ring-2 ring-purple-500' : ''}`}
-              onClick={() => setSelectedPlan(plan.id)}
+              className={`cursor-pointer transition-all ${selectedPlan === plan.tier ? 'ring-2 ring-purple-500' : ''}`}
+              onClick={() => setSelectedPlan(plan.tier)}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="capitalize">{plan.name}</CardTitle>
-                  {plan.popular && (
+                  {plan.tier === 'plus' && (
                     <Badge className="bg-purple-600">Popular</Badge>
                   )}
                 </div>
                 <div className="space-y-1">
                   <div className="text-3xl font-bold">
-                    {getPricePerMonth(plan.id, selectedDuration)} TND
+                    {getPricePerMonth(plan.tier, selectedDuration)} TND
                     <span className="text-lg font-normal text-gray-600">/month</span>
                   </div>
                   {selectedDuration > 1 && (
                     <p className="text-sm text-green-600">
-                      Total: {getPrice(plan.id, selectedDuration)} TND for {selectedDuration} months
+                      Total: {getPrice(plan.tier, selectedDuration)} TND for {selectedDuration} months
                     </p>
                   )}
                 </div>

@@ -1,6 +1,6 @@
 
 import { useAuth } from '@/contexts/AuthContext';
-import { SubscriptionTier } from '@/types/subscription';
+import { SubscriptionTier, SUBSCRIPTION_PLANS } from '@/types/subscription';
 
 export const useSubscriptionAccess = () => {
   const { user } = useAuth();
@@ -56,6 +56,10 @@ export const useSubscriptionAccess = () => {
     }
   };
   
+  const getCurrentPlanDetails = () => {
+    return SUBSCRIPTION_PLANS.find(plan => plan.tier === currentPlan);
+  };
+  
   return {
     currentPlan,
     canAccessClasses,
@@ -64,6 +68,7 @@ export const useSubscriptionAccess = () => {
     canAccessCoaches,
     canBookMultiplePerDay,
     getBookingLimit,
-    needsUpgrade
+    needsUpgrade,
+    getCurrentPlanDetails
   };
 };

@@ -15,6 +15,7 @@ import About from '@/pages/public/About';
 import PublicGyms from '@/pages/public/Gyms';
 import PublicCoaches from '@/pages/public/Coaches';
 import FAQ from '@/pages/public/FAQ';
+import Contact from '@/pages/public/Contact';
 import Terms from '@/pages/legal/Terms';
 import Privacy from '@/pages/legal/Privacy';
 
@@ -60,6 +61,7 @@ function App() {
               <Route path="/gyms" element={<PublicGyms />} />
               <Route path="/coaches" element={<PublicCoaches />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
 

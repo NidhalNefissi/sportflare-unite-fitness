@@ -1,128 +1,146 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Scale } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 const Terms = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                SportFlare
-              </span>
-            </Link>
-            <Button variant="outline" asChild>
-              <Link to="/">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Link>
-            </Button>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <Link to="/" className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Home
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900">Terms of Service</h1>
+          <p className="text-gray-600 mt-2">Last updated: June 27, 2025</p>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold flex items-center justify-center gap-3">
-              <Scale className="w-8 h-8 text-blue-600" />
-              Terms of Use
-            </CardTitle>
-            <CardDescription className="text-lg">
-              Last updated: December 2024
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="prose max-w-none space-y-8">
-            <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">1. Acceptance of Terms</h2>
-              <p className="text-gray-700 leading-relaxed">
-                By accessing and using SportFlare, you accept and agree to be bound by the terms and provision of this agreement. 
-                If you do not agree to abide by the above, please do not use this service.
-              </p>
-            </section>
+        <div className="bg-white rounded-lg shadow-sm p-8 space-y-8">
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">1. Acceptance of Terms</h2>
+            <p className="text-gray-700 leading-relaxed">
+              By accessing and using SportFlare ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+            </p>
+          </section>
 
-            <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">2. User Accounts</h2>
-              <div className="space-y-3 text-gray-700">
-                <p>When you create an account with us, you must provide information that is accurate, complete, and current at all times.</p>
-                <p>You are responsible for safeguarding the password and for maintaining the security of your account.</p>
-                <p>We support multiple user roles: Client, Coach, Gym Owner, Brand, and Admin, each with specific privileges and responsibilities.</p>
-              </div>
-            </section>
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">2. Description of Service</h2>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              SportFlare is a fitness and wellness platform that connects clients with fitness professionals, gyms, and wellness brands in Tunisia. Our services include:
+            </p>
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <li>Class booking and scheduling</li>
+              <li>Personal training programs</li>
+              <li>Gym and studio access</li>
+              <li>Fitness product marketplace</li>
+              <li>AI-powered fitness coaching</li>
+              <li>Community features and social sharing</li>
+            </ul>
+          </section>
 
-            <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">3. Booking and Cancellation Policy</h2>
-              <div className="space-y-3 text-gray-700">
-                <p><strong>Class Bookings:</strong> All class bookings are subject to availability and gym-specific policies.</p>
-                <p><strong>Cancellation:</strong> Classes can be cancelled up to 24 hours before the scheduled time without penalty.</p>
-                <p><strong>No-Show Policy:</strong> Failure to attend a booked class may result in booking restrictions.</p>
-                <p><strong>QR Check-in:</strong> Attendance is verified through QR code scanning at the venue.</p>
-              </div>
-            </section>
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">3. User Accounts and Registration</h2>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              To access certain features of SportFlare, you must register for an account. When you register, you agree to:
+            </p>
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <li>Provide accurate, current, and complete information</li>
+              <li>Maintain and update your information to keep it accurate</li>
+              <li>Keep your password secure and confidential</li>
+              <li>Accept responsibility for all activities under your account</li>
+            </ul>
+          </section>
 
-            <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">4. Payment Terms</h2>
-              <div className="space-y-3 text-gray-700">
-                <p>All payments are processed in Tunisian Dinar (TND) through our secure payment gateway Flouci.tn.</p>
-                <p>Payment options include online payment or in-person payment at participating gyms.</p>
-                <p>Subscription fees are non-refundable unless specified otherwise.</p>
-                <p>Prices are subject to change with 30 days notice.</p>
-              </div>
-            </section>
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">4. Subscription Plans and Payments</h2>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              SportFlare offers multiple subscription tiers with different features and pricing:
+            </p>
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <li><strong>Basic Plan:</strong> 60 TND/month - Gym access and basic features</li>
+              <li><strong>Plus Plan:</strong> 90 TND/month - Includes classes and AI coaching</li>
+              <li><strong>Premium Plan:</strong> 120 TND/month - Unlimited access to all features</li>
+            </ul>
+            <p className="text-gray-700 leading-relaxed mt-4">
+              Payments are processed through Flouci.tn or can be made directly at affiliated gyms. Subscriptions auto-renew unless cancelled.
+            </p>
+          </section>
 
-            <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">5. User Conduct</h2>
-              <div className="space-y-3 text-gray-700">
-                <p>Users must not engage in any activity that disrupts or interferes with the service.</p>
-                <p>Reviews and ratings must be honest and based on actual experiences.</p>
-                <p>Inappropriate content, harassment, or abuse will result in account suspension.</p>
-                <p>Commercial solicitation outside of designated brand accounts is prohibited.</p>
-              </div>
-            </section>
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">5. Booking and Cancellation Policy</h2>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              Class bookings and cancellations are subject to the following policies:
+            </p>
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <li>Bookings can be cancelled up to 24 hours before the class start time</li>
+              <li>Late cancellations or no-shows may result in booking restrictions</li>
+              <li>Premium members have priority booking access</li>
+              <li>Class availability is subject to capacity and instructor availability</li>
+            </ul>
+          </section>
 
-            <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">6. Intellectual Property</h2>
-              <p className="text-gray-700 leading-relaxed">
-                The service and its original content, features, and functionality are and will remain the exclusive property of 
-                SportFlare and its licensors. The service is protected by copyright, trademark, and other laws.
-              </p>
-            </section>
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">6. User Conduct</h2>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              You agree not to use SportFlare to:
+            </p>
+            <ul className="list-disc list-inside text-gray-700 space-y-2">
+              <li>Violate any applicable laws or regulations</li>
+              <li>Harass, abuse, or harm other users</li>
+              <li>Share inappropriate or offensive content</li>
+              <li>Attempt to gain unauthorized access to our systems</li>
+              <li>Use the service for commercial purposes without permission</li>
+            </ul>
+          </section>
 
-            <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">7. Privacy Policy</h2>
-              <p className="text-gray-700 leading-relaxed">
-                Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the service, 
-                to understand our practices.
-              </p>
-            </section>
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">7. Health and Safety</h2>
+            <p className="text-gray-700 leading-relaxed">
+              Before participating in any fitness activities, you should consult with a healthcare provider. SportFlare is not responsible for any injuries or health issues that may occur during the use of our services. Participation in fitness activities is at your own risk.
+            </p>
+          </section>
 
-            <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">8. Limitation of Liability</h2>
-              <p className="text-gray-700 leading-relaxed">
-                In no event shall SportFlare, its directors, employees, partners, agents, suppliers, or affiliates be liable for any 
-                indirect, incidental, special, consequential, or punitive damages arising from your use of the service.
-              </p>
-            </section>
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">8. Intellectual Property</h2>
+            <p className="text-gray-700 leading-relaxed">
+              All content on SportFlare, including but not limited to text, graphics, logos, images, and software, is the property of SportFlare or its content suppliers and is protected by Tunisian and international copyright laws.
+            </p>
+          </section>
 
-            <section>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">9. Contact Information</h2>
-              <div className="space-y-2 text-gray-700">
-                <p>If you have any questions about these Terms of Use, please contact us:</p>
-                <p>Email: legal@sportflare.tn</p>
-                <p>Phone: +216 XX XXX XXX</p>
-                <p>Address: Tunis, Tunisia</p>
-              </div>
-            </section>
-          </CardContent>
-        </Card>
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">9. Limitation of Liability</h2>
+            <p className="text-gray-700 leading-relaxed">
+              SportFlare shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">10. Termination</h2>
+            <p className="text-gray-700 leading-relaxed">
+              We may terminate or suspend your account and access to the service immediately, without prior notice, for conduct that we believe violates these Terms of Service or is harmful to other users, us, or third parties.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">11. Changes to Terms</h2>
+            <p className="text-gray-700 leading-relaxed">
+              We reserve the right to modify these terms at any time. We will notify users of any material changes via email or through the platform. Continued use of the service after changes constitutes acceptance of the new terms.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">12. Contact Information</h2>
+            <p className="text-gray-700 leading-relaxed">
+              If you have any questions about these Terms of Service, please contact us at:
+            </p>
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <p className="text-gray-700">Email: legal@sportflare.tn</p>
+              <p className="text-gray-700">Phone: +216 71 123 456</p>
+              <p className="text-gray-700">Address: Avenue Habib Bourguiba, Tunis, Tunisia</p>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
