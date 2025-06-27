@@ -19,7 +19,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     name: 'Basic',
     tier: 'basic',
     price: 60,
-    features: ['Access to gym facilities', 'Basic workout tracking'],
+    features: ['Access to gym facilities', 'Basic workout tracking', '1 free trial class'],
     classBookingLimit: 0,
     gymAccess: true,
     aiCoach: false,

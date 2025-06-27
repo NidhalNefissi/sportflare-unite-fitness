@@ -10,6 +10,10 @@ interface User {
   role: UserRole;
   avatar?: string;
   phone?: string;
+  subscription?: {
+    plan: 'basic' | 'plus' | 'premium';
+    expiresAt: string;
+  };
 }
 
 interface AuthContextType {
@@ -46,16 +50,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const mockUser = mockUsers.find(u => u.email === email && u.password === password);
+    // Find user by email (password is not stored in mockUsers for security)
+    const mockUser = mockUsers.find(u => u.email === email);
     
-    if (mockUser) {
+    if (mockUser && password === 'password123') {
       const userData = {
         id: mockUser.id,
         email: mockUser.email,
         name: mockUser.name,
         role: mockUser.role,
         avatar: mockUser.avatar,
-        phone: mockUser.phone
+        phone: mockUser.phone,
+        subscription: mockUser.subscription
       };
       
       setUser(userData);
@@ -115,7 +121,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       name: formData.name,
       role: formData.role,
       phone: formData.phone,
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+      subscription: {
+        plan: 'basic' as const,
+        expiresAt: '2024-12-31'
+      }
     };
     
     setUser(newUser);

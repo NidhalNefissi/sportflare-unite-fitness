@@ -126,18 +126,6 @@ export const mockUsers: User[] = [
     location: 'Tunis, Tunisia',
     joinDate: '2023-12-01',
     isVerified: true
-  },
-  {
-    id: 'admin-2',
-    email: 'admin2@sportflare.tn',
-    name: 'Leila Mansouri',
-    role: 'admin',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
-    phone: '+216 71 123 457',
-    bio: 'Content moderator and user support specialist',
-    location: 'Tunis, Tunisia',
-    joinDate: '2023-12-15',
-    isVerified: true
   }
 ];
 

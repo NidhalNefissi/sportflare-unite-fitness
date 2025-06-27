@@ -5,8 +5,8 @@ import { SubscriptionTier, SUBSCRIPTION_PLANS } from '@/types/subscription';
 export const useSubscriptionAccess = () => {
   const { user } = useAuth();
   
-  // Mock subscription data - in real app this would come from user profile
-  const currentPlan: SubscriptionTier = 'premium'; // Mock premium for demo
+  // Get current plan from user subscription or default to basic
+  const currentPlan: SubscriptionTier = user?.subscription?.plan || 'basic';
   
   const canAccessClasses = (): boolean => {
     return currentPlan === 'plus' || currentPlan === 'premium';
@@ -17,7 +17,7 @@ export const useSubscriptionAccess = () => {
   };
   
   const canAccessGyms = (): boolean => {
-    return currentPlan === 'plus' || currentPlan === 'premium';
+    return true; // All plans can access gyms
   };
   
   const canAccessCoaches = (): boolean => {
@@ -31,7 +31,7 @@ export const useSubscriptionAccess = () => {
   const getBookingLimit = (): number => {
     switch (currentPlan) {
       case 'basic':
-        return 0; // No class bookings
+        return 0; // No class bookings (except 1 free trial)
       case 'plus':
         return 1; // One per day
       case 'premium':
@@ -41,14 +41,17 @@ export const useSubscriptionAccess = () => {
     }
   };
   
+  const hasFreeTrial = (): boolean => {
+    // Mock logic - in real app this would check if user has used free trial
+    return currentPlan === 'basic';
+  };
+  
   const needsUpgrade = (feature: string): boolean => {
     switch (feature) {
       case 'classes':
         return !canAccessClasses();
       case 'ai-coach':
         return !canAccessAICoach();
-      case 'gyms':
-        return !canAccessGyms();
       case 'coaches':
         return !canAccessCoaches();
       default:
@@ -68,6 +71,7 @@ export const useSubscriptionAccess = () => {
     canAccessCoaches,
     canBookMultiplePerDay,
     getBookingLimit,
+    hasFreeTrial,
     needsUpgrade,
     getCurrentPlanDetails
   };
