@@ -5,17 +5,21 @@ export type ProgramCategory = 'Weight Loss' | 'Muscle Gain' | 'Strength' | 'Card
 
 export interface TrainingProgram {
   id: string;
-  name: string;
+  title: string; // Changed from 'name' to 'title'
   description: string;
   duration: string;
-  difficulty: ProgramLevel;
+  level: ProgramLevel; // Changed from 'difficulty' to 'level'
   category: ProgramCategory;
   type: ProgramType;
-  image: string;
+  image?: string;
   rating: number;
-  sales: number;
+  price: number; // Added price field
+  enrollments: number; // Changed from 'sales' to 'enrollments'
+  sessions: number; // Added sessions field
   revenue: number;
   features: string[];
   gym?: string;
   studio?: string;
+  createdAt: string; // Added createdAt field
+  isActive: boolean; // Added isActive field
 }

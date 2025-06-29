@@ -1,279 +1,239 @@
 
-import React, { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Users, 
-  Building2, 
-  Package, 
   CreditCard, 
+  Calendar, 
   TrendingUp, 
-  AlertTriangle,
-  UserCheck,
-  UserX,
-  MessageSquare,
-  Settings,
-  FileText,
+  AlertTriangle, 
   Shield,
-  Activity
+  Building,
+  Star,
+  DollarSign,
+  Activity,
+  Bell,
+  Settings,
+  Eye,
+  Ban,
+  Check
 } from 'lucide-react';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'client' | 'coach' | 'gym_owner' | 'brand';
-  status: 'active' | 'suspended' | 'pending';
-  joinDate: string;
-  lastActive: string;
-}
-
-interface Transaction {
-  id: string;
-  userId: string;
-  userName: string;
-  type: 'subscription' | 'product' | 'class';
-  amount: number;
-  status: 'completed' | 'pending' | 'failed';
-  date: string;
-}
+import { useState } from 'react';
 
 const AdminDashboard = () => {
-  const [users, setUsers] = useState<User[]>([
+  const { user } = useAuth();
+  
+  const [platformStats] = useState({
+    totalUsers: 1245,
+    activeUsers: 892,
+    totalGyms: 45,
+    totalCoaches: 123,
+    totalBrands: 28,
+    monthlyRevenue: 125430,
+    totalBookings: 5670,
+    pendingApprovals: 12,
+    reportedIssues: 8,
+    systemHealth: 98.5
+  });
+
+  const [recentUsers] = useState([
     {
-      id: 'client-1',
-      name: 'Sarah Ben Mohamed',
-      email: 'client1@test.com', 
+      id: '1',
+      name: 'Sarah Johnson',
+      email: 'sarah@example.com',
       role: 'client',
       status: 'active',
-      joinDate: '2024-01-15',
-      lastActive: '2024-06-26'
+      joinDate: '2024-12-28',
+      lastActive: '2 hours ago'
     },
     {
-      id: 'coach-1',
-      name: 'Emma Kallel',
-      email: 'coach1@test.com',
-      role: 'coach', 
-      status: 'active',
-      joinDate: '2024-02-10',
-      lastActive: '2024-06-25'
-    },
-    {
-      id: 'gym-1',
-      name: 'Ahmed Fitness Center',
-      email: 'gym1@test.com',
+      id: '2',
+      name: 'Ahmed Fitness',
+      email: 'ahmed@gym.com',
       role: 'gym_owner',
       status: 'pending',
-      joinDate: '2024-06-20',
-      lastActive: '2024-06-24'
+      joinDate: '2024-12-27',
+      lastActive: '1 day ago'
     },
     {
-      id: 'brand-1',
-      name: 'FitNutrition Tunisia',
-      email: 'brand1@test.com',
+      id: '3',
+      name: 'FitSupplements',
+      email: 'contact@fitsupplements.tn',
       role: 'brand',
       status: 'active',
-      joinDate: '2024-03-05',
-      lastActive: '2024-06-26'
+      joinDate: '2024-12-26',
+      lastActive: '3 hours ago'
     }
   ]);
 
-  const [transactions] = useState<Transaction[]>([
+  const [pendingApprovals] = useState([
     {
-      id: 'txn-1',
-      userId: 'client-1',
-      userName: 'Sarah Ben Mohamed',
-      type: 'subscription',
-      amount: 90,
-      status: 'completed',
-      date: '2024-06-25'
+      id: '1',
+      type: 'gym',
+      name: 'New Fitness Center',
+      submittedBy: 'Ahmed Fitness',
+      date: '2024-12-28',
+      status: 'pending'
     },
     {
-      id: 'txn-2', 
-      userId: 'client-1',
-      userName: 'Sarah Ben Mohamed',
-      type: 'product',
-      amount: 89.99,
-      status: 'completed',
-      date: '2024-06-24'
+      id: '2',
+      type: 'coach',
+      name: 'Personal Training Certification',
+      submittedBy: 'Emma Trainer',
+      date: '2024-12-27',
+      status: 'pending'
     },
     {
-      id: 'txn-3',
-      userId: 'client-2',
-      userName: 'Mohamed Ali',
+      id: '3',
+      type: 'brand',
+      name: 'Protein Supplements Store',
+      submittedBy: 'NutriTech',
+      date: '2024-12-26',
+      status: 'pending'
+    }
+  ]);
+
+  const [transactions] = useState([
+    {
+      id: 'TXN-001',
+      user: 'Sarah Johnson',
       type: 'subscription',
       amount: 120,
+      status: 'completed',
+      date: '2024-12-28'
+    },
+    {
+      id: 'TXN-002',
+      user: 'Mike Wilson',
+      type: 'product',
+      amount: 85,
+      status: 'completed',
+      date: '2024-12-28'
+    },
+    {
+      id: 'TXN-003',
+      user: 'Lisa Chen',
+      type: 'subscription',
+      amount: 90,
       status: 'pending',
-      date: '2024-06-26'
+      date: '2024-12-27'
     }
   ]);
 
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
-  const [isNotificationDialogOpen, setIsNotificationDialogOpen] = useState(false);
-
-  const handleUserStatusChange = (userId: string, newStatus: 'active' | 'suspended') => {
-    setUsers(prev => prev.map(user => 
-      user.id === userId ? { ...user, status: newStatus } : user
-    ));
-    
-    toast({
-      title: "User Status Updated",
-      description: `User has been ${newStatus === 'suspended' ? 'suspended' : 'activated'}.`
-    });
-  };
-
   const handleApproveUser = (userId: string) => {
-    setUsers(prev => prev.map(user => 
-      user.id === userId ? { ...user, status: 'active' } : user
-    ));
-    
-    toast({
-      title: "User Approved",
-      description: "User account has been approved and activated."
-    });
+    console.log('Approving user:', userId);
   };
 
-  const sendGlobalNotification = () => {
-    if (!notificationMessage.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a notification message.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const handleSuspendUser = (userId: string) => {
+    console.log('Suspending user:', userId);
+  };
 
-    // Mock send notification
-    toast({
-      title: "Notification Sent",
-      description: `Global notification sent to all ${users.length} users.`
-    });
-    
-    setNotificationMessage('');
-    setIsNotificationDialogOpen(false);
+  const handleApproveContent = (contentId: string) => {
+    console.log('Approving content:', contentId);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
-      case 'suspended': return 'bg-red-100 text-red-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'suspended': return 'bg-red-100 text-red-800';
+      case 'completed': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getRoleColor = (role: string) => {
+  const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'client': return 'bg-blue-100 text-blue-800';
-      case 'coach': return 'bg-purple-100 text-purple-800';
-      case 'gym_owner': return 'bg-orange-100 text-orange-800';
-      case 'brand': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'client': return <Users className="w-4 h-4" />;
+      case 'coach': return <Star className="w-4 h-4" />;
+      case 'gym_owner': return <Building className="w-4 h-4" />;
+      case 'brand': return <CreditCard className="w-4 h-4" />;
+      default: return <Users className="w-4 h-4" />;
     }
-  };
-
-  const stats = {
-    totalUsers: users.length,
-    activeUsers: users.filter(u => u.status === 'active').length,
-    pendingUsers: users.filter(u => u.status === 'pending').length,
-    totalRevenue: transactions.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.amount, 0),
-    pendingTransactions: transactions.filter(t => t.status === 'pending').length,
-    completedTransactions: transactions.filter(t => t.status === 'completed').length
   };
 
   return (
     <DashboardLayout role="admin">
       <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-slate-900 to-slate-700 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold mb-2">Admin Dashboard</h1>
-              <p className="text-slate-300">Manage users, content, and system analytics</p>
+        {/* Welcome Header */}
+        <div className="bg-gradient-to-r from-red-600 to-purple-600 rounded-xl p-6 text-white">
+          <h1 className="text-2xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-red-100">Manage and monitor the SportFlare platform</p>
+          <div className="flex items-center gap-4 mt-3">
+            <div className="flex items-center gap-1">
+              <Shield className="w-4 h-4" />
+              <span className="text-sm">System Health: {platformStats.systemHealth}%</span>
             </div>
-            <Dialog open={isNotificationDialogOpen} onOpenChange={setIsNotificationDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="secondary">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Send Global Notification
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Send Global Notification</DialogTitle>
-                  <DialogDescription>
-                    Send a notification to all users on the platform.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <textarea
-                    className="w-full p-3 border rounded-lg resize-none"
-                    rows={4}
-                    placeholder="Enter your notification message..."
-                    value={notificationMessage}
-                    onChange={(e) => setNotificationMessage(e.target.value)}
-                  />
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsNotificationDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={sendGlobalNotification}>
-                    Send Notification
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <div className="flex items-center gap-1">
+              <AlertTriangle className="w-4 h-4" />
+              <span className="text-sm">{platformStats.pendingApprovals} pending approvals</span>
+            </div>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Button className="h-16 bg-blue-600 hover:bg-blue-700 flex flex-col items-center justify-center gap-1">
+            <Users className="w-5 h-5" />
+            <span className="text-sm">Manage Users</span>
+          </Button>
+          <Button className="h-16 bg-green-600 hover:bg-green-700 flex flex-col items-center justify-center gap-1">
+            <Check className="w-5 h-5" />
+            <span className="text-sm">Approvals</span>
+            {platformStats.pendingApprovals > 0 && (
+              <Badge variant="destructive" className="text-xs">
+                {platformStats.pendingApprovals}
+              </Badge>
+            )}
+          </Button>
+          <Button className="h-16 bg-purple-600 hover:bg-purple-700 flex flex-col items-center justify-center gap-1">
+            <TrendingUp className="w-5 h-5" />
+            <span className="text-sm">Analytics</span>
+          </Button>
+          <Button className="h-16 bg-orange-600 hover:bg-orange-700 flex flex-col items-center justify-center gap-1">
+            <Bell className="w-5 h-5" />
+            <span className="text-sm">Notifications</span>
+          </Button>
+        </div>
+
+        {/* Platform Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
               <Users className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalUsers}</div>
+              <div className="text-2xl font-bold">{platformStats.totalUsers}</div>
               <p className="text-xs text-muted-foreground">
-                {stats.activeUsers} active, {stats.pendingUsers} pending
+                {platformStats.activeUsers} active users
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-              <CreditCard className="h-4 w-4 text-green-600" />
+              <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalRevenue.toFixed(2)} TND</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.completedTransactions} completed transactions
-              </p>
+              <div className="text-2xl font-bold">{platformStats.monthlyRevenue.toLocaleString()} TND</div>
+              <p className="text-xs text-muted-foreground">+15% from last month</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+              <Calendar className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingUsers}</div>
-              <p className="text-xs text-muted-foreground">
-                User accounts awaiting approval
-              </p>
+              <div className="text-2xl font-bold">{platformStats.totalBookings}</div>
+              <p className="text-xs text-muted-foreground">This month</p>
             </CardContent>
           </Card>
 
@@ -283,91 +243,120 @@ const AdminDashboard = () => {
               <Activity className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">99.2%</div>
-              <p className="text-xs text-muted-foreground">
-                Platform uptime
-              </p>
+              <div className="text-2xl font-bold">{platformStats.systemHealth}%</div>
+              <p className="text-xs text-muted-foreground">All systems operational</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content */}
-        <Tabs defaultValue="users" className="space-y-4">
-          <TabsList>
+        {/* Management Tabs */}
+        <Tabs defaultValue="users" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="users">User Management</TabsTrigger>
+            <TabsTrigger value="approvals">
+              Approvals ({platformStats.pendingApprovals})
+            </TabsTrigger>
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            <TabsTrigger value="content">Content Approval</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>User Management</CardTitle>
-                <CardDescription>Manage user accounts and permissions</CardDescription>
+                <CardTitle>Recent Users</CardTitle>
+                <CardDescription>Latest user registrations and activity</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {users.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div>
-                          <h4 className="font-medium">{user.name}</h4>
-                          <p className="text-sm text-gray-600">{user.email}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge className={getRoleColor(user.role)}>
-                              {user.role.replace('_', ' ')}
-                            </Badge>
-                            <Badge className={getStatusColor(user.status)}>
-                              {user.status}
-                            </Badge>
-                          </div>
-                        </div>
+              <CardContent className="space-y-4">
+                {recentUsers.map((user) => (
+                  <div key={user.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      {getRoleIcon(user.role)}
+                      <div>
+                        <h4 className="font-medium">{user.name}</h4>
+                        <p className="text-sm text-gray-600">{user.email}</p>
+                        <p className="text-xs text-gray-500">
+                          Joined {user.joinDate} • Last active {user.lastActive}
+                        </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {user.status === 'pending' && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleApproveUser(user.id)}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <UserCheck className="w-4 h-4 mr-1" />
-                            Approve
-                          </Button>
-                        )}
-                        {user.status === 'active' && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleUserStatusChange(user.id, 'suspended')}
-                          >
-                            <UserX className="w-4 h-4 mr-1" />
-                            Suspend
-                          </Button>
-                        )}
-                        {user.status === 'suspended' && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleUserStatusChange(user.id, 'active')}
-                          >
-                            <UserCheck className="w-4 h-4 mr-1" />
-                            Reactivate
-                          </Button>
-                        )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getStatusColor(user.status)}>
+                        {user.status}
+                      </Badge>
+                      <div className="flex gap-1">
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setIsUserDialogOpen(true);
-                          }}
+                          onClick={() => handleApproveUser(user.id)}
                         >
-                          View Details
+                          <Eye className="w-4 h-4" />
                         </Button>
+                        {user.status === 'active' ? (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleSuspendUser(user.id)}
+                          >
+                            <Ban className="w-4 h-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => handleApproveUser(user.id)}
+                          >
+                            <Check className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="approvals" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Pending Approvals</CardTitle>
+                <CardDescription>Content and user verifications awaiting review</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {pendingApprovals.map((approval) => (
+                  <div key={approval.id} className="flex items-center justify-between p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div>
+                      <h4 className="font-medium">{approval.name}</h4>
+                      <p className="text-sm text-gray-600">
+                        {approval.type.charAt(0).toUpperCase() + approval.type.slice(1)} • Submitted by {approval.submittedBy}
+                      </p>
+                      <p className="text-xs text-gray-500">Submitted on {approval.date}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        Review
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                      >
+                        Reject
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => handleApproveContent(approval.id)}
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        Approve
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </TabsContent>
@@ -375,150 +364,125 @@ const AdminDashboard = () => {
           <TabsContent value="transactions" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Transaction History</CardTitle>
-                <CardDescription>Monitor all platform transactions</CardDescription>
+                <CardTitle>Recent Transactions</CardTitle>
+                <CardDescription>Payment and subscription activity</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {transactions.map((transaction) => (
-                    <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h4 className="font-medium">{transaction.userName}</h4>
-                        <p className="text-sm text-gray-600">
-                          {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)} - {transaction.date}
-                        </p>
-                      </div>
+              <CardContent className="space-y-4">
+                {transactions.map((transaction) => (
+                  <div key={transaction.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <h4 className="font-medium">{transaction.id}</h4>
+                      <p className="text-sm text-gray-600">
+                        {transaction.user} • {transaction.type}
+                      </p>
+                      <p className="text-xs text-gray-500">{transaction.date}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <div className="text-right">
-                        <p className="font-bold">{transaction.amount} TND</p>
-                        <Badge className={transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                        <div className="font-semibold">{transaction.amount} TND</div>
+                        <Badge className={getStatusColor(transaction.status)}>
                           {transaction.status}
                         </Badge>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="content" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Content Moderation</CardTitle>
-                <CardDescription>Review and approve user-generated content</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No Pending Content</h3>
-                  <p className="text-gray-600">All content has been reviewed and approved.</p>
-                </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Platform Analytics</CardTitle>
-                <CardDescription>System performance and usage metrics</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h4 className="font-medium">User Growth</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>Clients</span>
-                        <span>{users.filter(u => u.role === 'client').length}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Coaches</span>
-                        <span>{users.filter(u => u.role === 'coach').length}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Gym Owners</span>
-                        <span>{users.filter(u => u.role === 'gym_owner').length}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Brands</span>
-                        <span>{users.filter(u => u.role === 'brand').length}</span>
-                      </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Platform Growth</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Clients</span>
+                      <span className="text-sm font-medium">892</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '75%' }}></div>
                     </div>
                   </div>
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Revenue Breakdown</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>Subscriptions</span>
-                        <span>{transactions.filter(t => t.type === 'subscription' && t.status === 'completed').reduce((sum, t) => sum + t.amount, 0)} TND</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Products</span>
-                        <span>{transactions.filter(t => t.type === 'product' && t.status === 'completed').reduce((sum, t) => sum + t.amount, 0)} TND</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Classes</span>
-                        <span>{transactions.filter(t => t.type === 'class' && t.status === 'completed').reduce((sum, t) => sum + t.amount, 0)} TND</span>
-                      </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Coaches</span>
+                      <span className="text-sm font-medium">123</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-600 h-2 rounded-full" style={{ width: '60%' }}></div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Gyms</span>
+                      <span className="text-sm font-medium">45</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-purple-600 h-2 rounded-full" style={{ width: '40%' }}></div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Revenue Breakdown</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Subscriptions</span>
+                      <span className="text-sm font-medium">85,430 TND</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Products</span>
+                      <span className="text-sm font-medium">25,600 TND</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Commissions</span>
+                      <span className="text-sm font-medium">14,400 TND</span>
+                    </div>
+                    <hr />
+                    <div className="flex justify-between font-medium">
+                      <span>Total</span>
+                      <span>125,430 TND</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">API Status</span>
+                      <Badge className="bg-green-100 text-green-800">Operational</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Database</span>
+                      <Badge className="bg-green-100 text-green-800">Healthy</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Payment Gateway</span>
+                      <Badge className="bg-green-100 text-green-800">Active</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Storage</span>
+                      <Badge className="bg-yellow-100 text-yellow-800">85% Full</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
-
-        {/* User Details Dialog */}
-        <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>User Details</DialogTitle>
-              <DialogDescription>
-                View and manage user account information
-              </DialogDescription>
-            </DialogHeader>
-            {selectedUser && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Name:</span>
-                    <p>{selectedUser.name}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium">Email:</span>
-                    <p>{selectedUser.email}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium">Role:</span>
-                    <Badge className={getRoleColor(selectedUser.role)}>
-                      {selectedUser.role.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                  <div>
-                    <span className="font-medium">Status:</span>
-                    <Badge className={getStatusColor(selectedUser.status)}>
-                      {selectedUser.status}
-                    </Badge>
-                  </div>
-                  <div>
-                    <span className="font-medium">Join Date:</span>
-                    <p>{selectedUser.joinDate}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium">Last Active:</span>
-                    <p>{selectedUser.lastActive}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsUserDialogOpen(false)}>
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </DashboardLayout>
   );

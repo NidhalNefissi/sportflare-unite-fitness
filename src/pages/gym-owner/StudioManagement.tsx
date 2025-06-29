@@ -1,127 +1,142 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import { Check, X, Clock, MapPin, Calendar, User, Plus, Edit, Upload } from 'lucide-react';
-
-interface StudioRequest {
-  id: string;
-  coach: {
-    id: string;
-    name: string;
-    photo: string;
-    rating: number;
-  };
-  studio: {
-    id: string;
-    name: string;
-    capacity: number;
-  };
-  date: string;
-  startTime: string;
-  endTime: string;
-  classType: string;
-  expectedAttendees: number;
-  status: 'pending' | 'approved' | 'declined';
-  requestedAt: string;
-}
+import { 
+  Building, 
+  Calendar, 
+  Clock, 
+  Users, 
+  Star, 
+  Check, 
+  X, 
+  Plus, 
+  Edit,
+  MapPin
+} from 'lucide-react';
 
 interface Studio {
   id: string;
   name: string;
   capacity: number;
   equipment: string[];
-  photos: string[];
-  hourlyRate?: number;
-  availability: 'available' | 'occupied' | 'maintenance';
+  description: string;
+  hourlyRate: number;
+  isAvailable: boolean;
+  image: string;
 }
 
-const GymStudioManagement = () => {
-  const [requests, setRequests] = useState<StudioRequest[]>([
+interface StudioRequest {
+  id: string;
+  coachName: string;
+  coachEmail: string;
+  studioId: string;
+  studioName: string;
+  className: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  expectedParticipants: number;
+  status: 'pending' | 'approved' | 'rejected';
+  requestDate: string;
+  notes?: string;
+}
+
+const StudioManagement = () => {
+  const [studios, setStudios] = useState<Studio[]>([
     {
       id: '1',
-      coach: {
-        id: '3',
-        name: 'Sarah Johnson',
-        photo: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
-        rating: 4.9
-      },
-      studio: {
-        id: 'studio-a',
-        name: 'Studio A',
-        capacity: 25
-      },
-      date: '2024-12-30',
-      startTime: '18:00',
-      endTime: '19:00',
-      classType: 'Yoga Flow',
-      expectedAttendees: 18,
-      status: 'pending',
-      requestedAt: '2024-12-27T10:30:00Z'
+      name: 'Studio A - Yoga & Pilates',
+      capacity: 20,
+      equipment: ['Yoga Mats', 'Blocks', 'Straps', 'Sound System'],
+      description: 'Spacious studio perfect for yoga, pilates, and meditation classes.',
+      hourlyRate: 80,
+      isAvailable: true,
+      image: 'https://images.unsplash.com/photo-1545389336-cf090694435e?w=400&h=300&fit=crop'
     },
     {
       id: '2',
-      coach: {
-        id: '4',
-        name: 'Mike Thompson',
-        photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-        rating: 4.7
-      },
-      studio: {
-        id: 'studio-b',
-        name: 'Studio B',
-        capacity: 15
-      },
-      date: '2024-12-31',
-      startTime: '07:00',
-      endTime: '08:00',
-      classType: 'HIIT Training',
-      expectedAttendees: 12,
+      name: 'Studio B - HIIT & Cardio',
+      capacity: 15,
+      equipment: ['Battle Ropes', 'Kettlebells', 'TRX', 'Sound System', 'Mirrors'],
+      description: 'High-energy studio designed for HIIT, cardio, and strength training.',
+      hourlyRate: 100,
+      isAvailable: true,
+      image: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400&h=300&fit=crop'
+    },
+    {
+      id: '3',
+      name: 'Studio C - Dance & Movement',
+      capacity: 25,
+      equipment: ['Mirrors', 'Sound System', 'Ballet Bars', 'Dance Floor'],
+      description: 'Large studio with mirrors and professional dance flooring.',
+      hourlyRate: 90,
+      isAvailable: false,
+      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop'
+    }
+  ]);
+
+  const [requests, setRequests] = useState<StudioRequest[]>([
+    {
+      id: '1',
+      coachName: 'Emma Kallel',
+      coachEmail: 'emma@example.com',
+      studioId: '1',
+      studioName: 'Studio A - Yoga & Pilates',
+      className: 'Morning Vinyasa Flow',
+      date: '2024-12-30',
+      startTime: '08:00',
+      endTime: '09:30',
+      expectedParticipants: 15,
       status: 'pending',
-      requestedAt: '2024-12-27T14:20:00Z'
+      requestDate: '2024-12-28',
+      notes: 'Regular weekly class, need access 15 minutes early for setup.'
+    },
+    {
+      id: '2',
+      coachName: 'Sami Cherif',
+      coachEmail: 'sami@example.com',
+      studioId: '2',
+      studioName: 'Studio B - HIIT & Cardio',
+      className: 'High Intensity Bootcamp',
+      date: '2024-12-30',
+      startTime: '18:00',
+      endTime: '19:00',
+      expectedParticipants: 12,
+      status: 'pending',
+      requestDate: '2024-12-27',
+      notes: 'Will bring additional equipment for this special session.'
+    },
+    {
+      id: '3',
+      coachName: 'Lisa Ben Ali',
+      coachEmail: 'lisa@example.com',
+      studioId: '3',
+      studioName: 'Studio C - Dance & Movement',
+      className: 'Zumba Fitness',
+      date: '2024-12-29',
+      startTime: '19:00',
+      endTime: '20:00',
+      expectedParticipants: 20,
+      status: 'approved',
+      requestDate: '2024-12-25'
     }
   ]);
 
-  const [studios, setStudios] = useState<Studio[]>([
-    { 
-      id: 'studio-a', 
-      name: 'Studio A', 
-      capacity: 25, 
-      equipment: ['Yoga mats', 'Mirrors', 'Sound system'],
-      photos: ['https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=400&h=300&fit=crop'],
-      availability: 'available'
-    },
-    { 
-      id: 'studio-b', 
-      name: 'Studio B', 
-      capacity: 15, 
-      equipment: ['Free weights', 'Kettlebells', 'TRX'],
-      photos: ['https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=300&fit=crop'],
-      availability: 'available'
-    },
-    { 
-      id: 'studio-c', 
-      name: 'Studio C', 
-      capacity: 30, 
-      equipment: ['Cardio machines', 'Sound system', 'Mirrors'],
-      photos: ['https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop'],
-      availability: 'available'
-    }
-  ]);
-
-  const [isStudioDialogOpen, setIsStudioDialogOpen] = useState(false);
-  const [editingStudio, setEditingStudio] = useState<Studio | null>(null);
+  const [isCreateStudioOpen, setIsCreateStudioOpen] = useState(false);
   const [newStudio, setNewStudio] = useState({
     name: '',
     capacity: 0,
     equipment: '',
-    photo: ''
+    description: '',
+    hourlyRate: 0
   });
 
   const handleApproveRequest = (requestId: string) => {
@@ -130,35 +145,33 @@ const GymStudioManagement = () => {
         ? { ...req, status: 'approved' as const }
         : req
     ));
-
-    const request = requests.find(r => r.id === requestId);
+    
     toast({
       title: "Request Approved",
-      description: `${request?.coach.name}'s ${request?.classType} class has been approved.`
+      description: "Studio booking request has been approved.",
     });
   };
 
-  const handleDeclineRequest = (requestId: string) => {
+  const handleRejectRequest = (requestId: string) => {
     setRequests(prev => prev.map(req => 
       req.id === requestId 
-        ? { ...req, status: 'declined' as const }
+        ? { ...req, status: 'rejected' as const }
         : req
     ));
-
-    const request = requests.find(r => r.id === requestId);
+    
     toast({
-      title: "Request Declined",
-      description: `${request?.coach.name}'s request has been declined.`,
-      variant: "destructive"
+      title: "Request Rejected",
+      description: "Studio booking request has been rejected.",
+      variant: "destructive",
     });
   };
 
-  const handleAddStudio = () => {
+  const handleCreateStudio = () => {
     if (!newStudio.name || !newStudio.capacity) {
       toast({
-        title: "Missing Information",
+        title: "Error",
         description: "Please fill in all required fields.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -167,342 +180,313 @@ const GymStudioManagement = () => {
       id: Date.now().toString(),
       name: newStudio.name,
       capacity: newStudio.capacity,
-      equipment: newStudio.equipment.split(',').map(e => e.trim()),
-      photos: newStudio.photo ? [newStudio.photo] : [],
-      availability: 'available'
+      equipment: newStudio.equipment.split(',').map(item => item.trim()).filter(Boolean),
+      description: newStudio.description,
+      hourlyRate: newStudio.hourlyRate,
+      isAvailable: true,
+      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop'
     };
 
     setStudios(prev => [...prev, studio]);
-    setIsStudioDialogOpen(false);
-    setNewStudio({ name: '', capacity: 0, equipment: '', photo: '' });
-
+    setNewStudio({ name: '', capacity: 0, equipment: '', description: '', hourlyRate: 0 });
+    setIsCreateStudioOpen(false);
+    
     toast({
-      title: "Studio Added",
-      description: `${newStudio.name} has been added to your gym.`
+      title: "Studio Created",
+      description: "New studio has been added successfully.",
     });
   };
 
-  const handleEditStudio = (studio: Studio) => {
-    setEditingStudio(studio);
-    setNewStudio({
-      name: studio.name,
-      capacity: studio.capacity,
-      equipment: studio.equipment.join(', '),
-      photo: studio.photos[0] || ''
+  const toggleStudioAvailability = (studioId: string) => {
+    setStudios(prev => prev.map(studio => 
+      studio.id === studioId 
+        ? { ...studio, isAvailable: !studio.isAvailable }
+        : studio
+    ));
+    
+    toast({
+      title: "Studio Updated",
+      description: "Studio availability has been updated.",
     });
-    setIsStudioDialogOpen(true);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'approved': return 'bg-green-100 text-green-800';
-      case 'declined': return 'bg-red-100 text-red-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const pendingRequests = requests.filter(r => r.status === 'pending');
-  const approvedRequests = requests.filter(r => r.status === 'approved');
+  const pendingRequests = requests.filter(req => req.status === 'pending');
+  const approvedRequests = requests.filter(req => req.status === 'approved');
 
   return (
     <DashboardLayout role="gym_owner">
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Studio Management</h1>
-            <p className="text-gray-600">Manage coach studio reservation requests and schedules</p>
+        <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold mb-2">Studio Management</h1>
+              <p className="text-green-100">Manage your studios and booking requests</p>
+            </div>
+            <Dialog open={isCreateStudioOpen} onOpenChange={setIsCreateStudioOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-white/20 hover:bg-white/30 text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Studio
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New Studio</DialogTitle>
+                  <DialogDescription>
+                    Add a new studio space to your gym
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Studio Name *</Label>
+                    <Input
+                      id="name"
+                      value={newStudio.name}
+                      onChange={(e) => setNewStudio({...newStudio, name: e.target.value})}
+                      placeholder="e.g., Studio A - Yoga & Pilates"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="capacity">Capacity *</Label>
+                    <Input
+                      id="capacity"
+                      type="number"
+                      value={newStudio.capacity || ''}
+                      onChange={(e) => setNewStudio({...newStudio, capacity: parseInt(e.target.value) || 0})}
+                      placeholder="Maximum number of people"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="equipment">Equipment (comma-separated)</Label>
+                    <Input
+                      id="equipment"
+                      value={newStudio.equipment}
+                      onChange={(e) => setNewStudio({...newStudio, equipment: e.target.value})}
+                      placeholder="Yoga Mats, Sound System, Mirrors"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={newStudio.description}
+                      onChange={(e) => setNewStudio({...newStudio, description: e.target.value})}
+                      placeholder="Describe the studio space..."
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="hourlyRate">Hourly Rate (TND)</Label>
+                    <Input
+                      id="hourlyRate"
+                      type="number"
+                      value={newStudio.hourlyRate || ''}
+                      onChange={(e) => setNewStudio({...newStudio, hourlyRate: parseInt(e.target.value) || 0})}
+                      placeholder="Price per hour"
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-4">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setIsCreateStudioOpen(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleCreateStudio}
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                    >
+                      Create Studio
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
-          <Dialog open={isStudioDialogOpen} onOpenChange={setIsStudioDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Studio
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{editingStudio ? 'Edit Studio' : 'Add New Studio'}</DialogTitle>
-                <DialogDescription>
-                  {editingStudio ? 'Update studio details' : 'Add a new studio to your gym'}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Studio Name</Label>
-                  <Input
-                    id="name"
-                    value={newStudio.name}
-                    onChange={(e) => setNewStudio(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="e.g., Studio A"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="capacity">Capacity</Label>
-                  <Input
-                    id="capacity"
-                    type="number"
-                    value={newStudio.capacity}
-                    onChange={(e) => setNewStudio(prev => ({ ...prev, capacity: parseInt(e.target.value) }))}
-                    placeholder="Maximum number of people"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="equipment">Equipment (comma-separated)</Label>
-                  <Input
-                    id="equipment"
-                    value={newStudio.equipment}
-                    onChange={(e) => setNewStudio(prev => ({ ...prev, equipment: e.target.value }))}
-                    placeholder="Yoga mats, Mirrors, Sound system"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="photo">Photo URL</Label>
-                  <Input
-                    id="photo"
-                    value={newStudio.photo}
-                    onChange={(e) => setNewStudio(prev => ({ ...prev, photo: e.target.value }))}
-                    placeholder="https://example.com/studio-photo.jpg"
-                  />
-                </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold text-blue-600">{studios.length}</div>
+              <p className="text-sm text-gray-600">Total Studios</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold text-green-600">
+                {studios.filter(s => s.isAvailable).length}
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsStudioDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleAddStudio} className="bg-blue-600 hover:bg-blue-700">
-                  {editingStudio ? 'Update Studio' : 'Add Studio'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Studios</CardTitle>
-              <MapPin className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{studios.length}</div>
-              <p className="text-xs text-muted-foreground">Available studios</p>
+              <p className="text-sm text-gray-600">Available Studios</p>
             </CardContent>
           </Card>
-
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
-              <Clock className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{pendingRequests.length}</div>
-              <p className="text-xs text-muted-foreground">Awaiting approval</p>
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold text-yellow-600">{pendingRequests.length}</div>
+              <p className="text-sm text-gray-600">Pending Requests</p>
             </CardContent>
           </Card>
-
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Approved Today</CardTitle>
-              <Check className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{approvedRequests.length}</div>
-              <p className="text-xs text-muted-foreground">Classes approved</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Studio Utilization</CardTitle>
-              <Calendar className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">78%</div>
-              <p className="text-xs text-muted-foreground">This week</p>
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold text-purple-600">{approvedRequests.length}</div>
+              <p className="text-sm text-gray-600">Approved Today</p>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Pending Requests */}
+        {/* Pending Requests */}
+        {pendingRequests.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-orange-600" />
-                Pending Requests
+                <Clock className="w-5 h-5" />
+                Pending Studio Requests
               </CardTitle>
-              <CardDescription>Coach studio reservation requests awaiting approval</CardDescription>
+              <CardDescription>Coach requests awaiting your approval</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {pendingRequests.length === 0 ? (
-                <div className="text-center py-8">
-                  <Clock className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">No pending requests</p>
-                </div>
-              ) : (
-                pendingRequests.map((request) => (
-                  <div key={request.id} className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <img 
-                          src={request.coach.photo} 
-                          alt={request.coach.name}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                        <div>
-                          <h4 className="font-medium">{request.coach.name}</h4>
-                          <div className="flex items-center gap-1">
-                            <span className="text-sm text-gray-600">Rating:</span>
-                            <span className="text-sm font-medium">{request.coach.rating}</span>
-                          </div>
-                        </div>
-                      </div>
+              {pendingRequests.map((request) => (
+                <div key={request.id} className="flex items-center justify-between p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-medium">{request.className}</h4>
                       <Badge className={getStatusColor(request.status)}>
                         {request.status}
                       </Badge>
                     </div>
-
-                    <div className="space-y-2 text-sm text-gray-600 mb-4">
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-3 h-3" />
+                        <span>Coach: {request.coachName}</span>
+                      </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="w-3 h-3" />
-                        <span>{request.studio.name} • {request.classType}</span>
+                        <span>{request.studioName}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-3 h-3" />
-                        <span>{new Date(request.date).toLocaleDateString()} at {request.startTime} - {request.endTime}</span>
+                        <span>{request.date} • {request.startTime} - {request.endTime}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <User className="w-3 h-3" />
-                        <span>{request.expectedAttendees} expected attendees (Studio capacity: {request.studio.capacity})</span>
+                        <Users className="w-3 h-3" />
+                        <span>{request.expectedParticipants} expected participants</span>
                       </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleApproveRequest(request.id)}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <Check className="w-4 h-4 mr-1" />
-                        Approve
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleDeclineRequest(request.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <X className="w-4 h-4 mr-1" />
-                        Decline
-                      </Button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Studio Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-blue-600" />
-                Your Studios
-              </CardTitle>
-              <CardDescription>Manage your gym studios</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {studios.map((studio) => (
-                <div key={studio.id} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      {studio.photos[0] && (
-                        <img 
-                          src={studio.photos[0]} 
-                          alt={studio.name}
-                          className="w-12 h-12 rounded object-cover"
-                        />
+                      {request.notes && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Note: {request.notes}
+                        </div>
                       )}
-                      <div>
-                        <h4 className="font-medium">{studio.name}</h4>
-                        <Badge variant="outline">
-                          Capacity: {studio.capacity}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleEditStudio(studio)}
-                      >
-                        <Edit className="w-3 h-3" />
-                      </Button>
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-gray-600">Equipment:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {studio.equipment.map((item, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {item}
-                        </Badge>
-                      ))}
-                    </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleRejectRequest(request.id)}
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Reject
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700"
+                      onClick={() => handleApproveRequest(request.id)}
+                    >
+                      <Check className="w-4 h-4 mr-1" />
+                      Approve
+                    </Button>
                   </div>
                 </div>
               ))}
             </CardContent>
           </Card>
-        </div>
+        )}
 
-        {/* Recent Approvals */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Check className="w-5 h-5 text-green-600" />
-              Recent Approvals
-            </CardTitle>
-            <CardDescription>Recently approved studio reservations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {approvedRequests.length === 0 ? (
-              <div className="text-center py-8">
-                <Check className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-600">No recent approvals</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {approvedRequests.map((request) => (
-                  <div key={request.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                    <div className="flex items-center space-x-3">
-                      <img 
-                        src={request.coach.photo} 
-                        alt={request.coach.name}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                      <div>
-                        <p className="font-medium">{request.coach.name}</p>
-                        <p className="text-sm text-gray-600">
-                          {request.studio.name} • {request.classType} • {new Date(request.date).toLocaleDateString()}
-                        </p>
+        {/* Studios Grid */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Studio Spaces</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {studios.map((studio) => (
+              <Card key={studio.id} className={`hover:shadow-lg transition-shadow ${!studio.isAvailable ? 'opacity-75' : ''}`}>
+                <div className="relative">
+                  <img
+                    src={studio.image}
+                    alt={studio.name}
+                    className="w-full h-48 object-cover rounded-t-lg"
+                  />
+                  <Badge 
+                    className={`absolute top-2 right-2 ${
+                      studio.isAvailable ? 'bg-green-500' : 'bg-red-500'
+                    }`}
+                  >
+                    {studio.isAvailable ? 'Available' : 'Unavailable'}
+                  </Badge>
+                </div>
+                
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className="text-lg font-semibold">{studio.name}</h3>
+                      <p className="text-sm text-gray-600">{studio.description}</p>
+                    </div>
+
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-gray-500" />
+                        <span>Capacity: {studio.capacity} people</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Building className="w-4 h-4 text-gray-500" />
+                        <span>{studio.hourlyRate} TND/hour</span>
                       </div>
                     </div>
-                    <Badge className={getStatusColor(request.status)}>
-                      Approved
-                    </Badge>
+
+                    <div className="flex flex-wrap gap-1">
+                      {studio.equipment.slice(0, 3).map((item, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {item}
+                        </Badge>
+                      ))}
+                      {studio.equipment.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{studio.equipment.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => toggleStudioAvailability(studio.id)}
+                        className="flex-1"
+                      >
+                        {studio.isAvailable ? 'Disable' : 'Enable'}
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
 };
 
-export default GymStudioManagement;
+export default StudioManagement;
